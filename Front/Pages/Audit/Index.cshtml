@@ -1,0 +1,47 @@
+@page
+@model DocumentPortalIam.Front.Pages.Audit.IndexModel
+@{
+    ViewData["Title"] = "Auditoria";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Trilha de eventos</p>
+        <h1>Auditoria</h1>
+        <p class="lead">Registros gerados por login LDAP, uploads, downloads, alteracao de papel e exportacoes.</p>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Eventos recentes</h2>
+    @if (!Model.Records.Any())
+    {
+        <p class="text-muted mb-0">Nenhum evento registrado ainda.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Ator</th>
+                        <th>Acao</th>
+                        <th>Detalhes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var record in Model.Records)
+                    {
+                        <tr>
+                            <td>@record.Timestamp.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td>@record.Actor</td>
+                            <td><span class="status-pill">@record.Action</span></td>
+                            <td>@record.Details</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

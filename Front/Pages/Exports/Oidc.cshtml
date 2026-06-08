@@ -1,0 +1,40 @@
+@page
+@model DocumentPortalIam.Front.Pages.Exports.OidcModel
+@{
+    ViewData["Title"] = "Exportacao OIDC";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">OpenID Connect</p>
+        <h1>Exportar para Google Drive demo</h1>
+        <p class="lead">O fluxo registra consentimento do usuario e gera um artefato com claims de ID token.</p>
+    </div>
+</section>
+
+@if (Model.ExportResult is not null)
+{
+    <section class="panel">
+        <h2>Exportacao concluida</h2>
+        <p>Documento exportado para a pasta externa local do demo.</p>
+        <pre class="bg-light border rounded p-3">@Model.ExportResult</pre>
+        <a class="btn btn-primary" asp-page="/Documents/Index">Voltar aos documentos</a>
+    </section>
+}
+else if (Model.Document is not null)
+{
+    <section class="panel">
+        <h2>Consentimento OIDC</h2>
+        <p><strong>Documento:</strong> @Model.Document.OriginalFileName</p>
+        <p><strong>Usuario autenticado:</strong> @User.Identity?.Name</p>
+        <form method="post">
+            <input type="hidden" asp-for="DocumentId" />
+            <div class="mb-3">
+                <label class="form-label" asp-for="ProviderAccount">Conta Google demo</label>
+                <input class="form-control" asp-for="ProviderAccount" />
+            </div>
+            <button class="btn btn-primary" type="submit">Autorizar e exportar</button>
+            <a class="btn btn-outline-secondary" asp-page="/Documents/Index">Cancelar</a>
+        </form>
+    </section>
+}

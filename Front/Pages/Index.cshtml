@@ -1,0 +1,84 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Sistema de Gestao de Documentos</p>
+        <h1>Portal IAM com acesso por papeis</h1>
+        <p class="lead">Upload, download e exportacao de documentos com autenticacao centralizada, RBAC, OIDC e OAuth2 M2M.</p>
+    </div>
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <a class="btn btn-primary" asp-page="/Documents/Index">Abrir documentos</a>
+    }
+    else
+    {
+        <a class="btn btn-primary" asp-page="/Account/Login">Entrar com LDAP</a>
+    }
+</section>
+
+<section class="metric-row">
+    <div class="metric-card">
+        <span>Protocolo de login</span>
+        <strong>LDAP</strong>
+        <p>Diretorio centralizado demo em JSON para facilitar a apresentacao.</p>
+    </div>
+    <div class="metric-card">
+        <span>Modelo de acesso</span>
+        <strong>RBAC</strong>
+        <p>Papeis mapeados para permissoes tecnicas e aplicados nas telas.</p>
+    </div>
+    <div class="metric-card">
+        <span>Docs visiveis agora</span>
+        <strong>@Model.VisibleDocumentCount</strong>
+        <p>A contagem muda conforme o papel do usuario autenticado.</p>
+    </div>
+</section>
+
+@if (Model.CurrentPermissions.Any())
+{
+    <section class="panel">
+        <h2>Permissoes da sessao atual</h2>
+        <div class="permission-list">
+            @foreach (var permission in Model.CurrentPermissions)
+            {
+                <span>@permission</span>
+            }
+        </div>
+    </section>
+}
+
+<section class="panel">
+    <h2>Matriz RBAC implementada</h2>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Papel</th>
+                    <th>Responsabilidade</th>
+                    <th>Permissoes</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var role in Model.Roles)
+                {
+                    <tr>
+                        <td class="fw-semibold">@role.Name</td>
+                        <td>@role.Description</td>
+                        <td>
+                            <div class="permission-list compact">
+                                @foreach (var permission in role.Permissions)
+                                {
+                                    <span>@permission</span>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

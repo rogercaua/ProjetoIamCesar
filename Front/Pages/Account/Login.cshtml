@@ -1,0 +1,39 @@
+@page
+@model DocumentPortalIam.Front.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Login LDAP";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Autenticacao centralizada</p>
+        <h1>Entrar pelo diretorio LDAP</h1>
+        <p class="lead">Use um dos usuarios de demonstracao para ver a mudanca de permissoes por papel.</p>
+    </div>
+</section>
+
+<form method="post" class="form-card">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <input type="hidden" asp-for="ReturnUrl" />
+
+    <div class="mb-3">
+        <label class="form-label" asp-for="Input.UserName">Usuario</label>
+        <input class="form-control" asp-for="Input.UserName" autocomplete="username" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label" asp-for="Input.Password">Senha</label>
+        <input class="form-control" asp-for="Input.Password" type="password" autocomplete="current-password" />
+    </div>
+    <button class="btn btn-primary w-100" type="submit">Entrar</button>
+
+    <div class="mt-4 small text-muted">
+        <div><strong>admin</strong> / Admin@123</div>
+        <div><strong>gestor</strong> / Gestor@123</div>
+        <div><strong>aluno</strong> / Aluno@123</div>
+        <div><strong>auditor</strong> / Auditor@123</div>
+    </div>
+</form>
