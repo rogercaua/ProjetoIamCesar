@@ -17,7 +17,7 @@ public static class Permissions
     public const string DownloadOwnDocuments = "documents.download.own";
     public const string DownloadAllDocuments = "documents.download.all";
     public const string DeleteDocuments = "documents.delete";
-    public const string ExportOidc = "exports.oidc";
+    public const string ExportGoogleDrive = "exports.google_drive";
     public const string ExportM2M = "exports.m2m";
     public const string ManageRoles = "users.manage.roles";
     public const string ViewAudit = "audit.view";

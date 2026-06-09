@@ -1,20 +1,19 @@
-using System.Text.Json;
+using DocumentPortalIam.Back.Core.Data;
 using DocumentPortalIam.Back.Core.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DocumentPortalIam.Back.Core.Services;
 
 public sealed class DocumentRepository : IDocumentRepository
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private const long MaxFileSize = 10 * 1024 * 1024;
+    private readonly AppDbContext _database;
     private readonly string _documentsPath;
-    private readonly string _indexFile;
-    private readonly SemaphoreSlim _lock = new(1, 1);
 
-    public DocumentRepository(IWebHostEnvironment environment)
+    public DocumentRepository(AppDbContext database, IWebHostEnvironment environment)
     {
-        var storageRoot = Path.Combine(environment.ContentRootPath, "Storage");
-        _documentsPath = Path.Combine(storageRoot, "documents");
-        _indexFile = Path.Combine(storageRoot, "documents.json");
+        _database = database;
+        _documentsPath = Path.Combine(environment.ContentRootPath, "Storage", "Documents");
     }
 
     public async Task<DocumentRecord> SaveAsync(IFormFile file, string ownerUserName, string sensitivity)
@@ -24,64 +23,50 @@ public sealed class DocumentRepository : IDocumentRepository
             throw new InvalidOperationException("Arquivo vazio.");
         }
 
-        if (file.Length > 10 * 1024 * 1024)
+        if (file.Length > MaxFileSize)
         {
-            throw new InvalidOperationException("O limite do demo e 10 MB.");
+            throw new InvalidOperationException("O limite do projeto e 10 MB.");
         }
 
-        await _lock.WaitAsync();
-        try
-        {
-            var documents = await ReadIndexAsync();
-            var nextId = documents.Count == 0 ? 1 : documents.Max(document => document.Id) + 1;
-            var extension = Path.GetExtension(file.FileName);
-            var storedFileName = $"{Guid.NewGuid():N}{extension}";
-            var record = new DocumentRecord
-            {
-                Id = nextId,
-                OriginalFileName = Path.GetFileName(file.FileName),
-                StoredFileName = storedFileName,
-                ContentType = string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
-                OwnerUserName = ownerUserName,
-                Sensitivity = sensitivity,
-                UploadedAt = DateTimeOffset.UtcNow
-            };
+        Directory.CreateDirectory(_documentsPath);
 
-            Directory.CreateDirectory(_documentsPath);
-            await using (var destination = File.Create(GetStoredPath(record)))
-            {
-                await file.CopyToAsync(destination);
-            }
-
-            documents.Add(record);
-            await WriteIndexAsync(documents);
-            return record;
-        }
-        finally
+        var extension = Path.GetExtension(file.FileName);
+        var storedFileName = $"{Guid.NewGuid():N}{extension}";
+        var record = new DocumentRecord
         {
-            _lock.Release();
+            OriginalFileName = Path.GetFileName(file.FileName),
+            StoredFileName = storedFileName,
+            ContentType = string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
+            SizeInBytes = file.Length,
+            OwnerUserName = ownerUserName,
+            Sensitivity = string.IsNullOrWhiteSpace(sensitivity) ? "Interno" : sensitivity,
+            UploadedAt = DateTimeOffset.UtcNow
+        };
+
+        await using (var destination = File.Create(GetStoredPath(record)))
+        {
+            await file.CopyToAsync(destination);
         }
+
+        _database.Documents.Add(record);
+        await _database.SaveChangesAsync();
+        return record;
     }
 
     public async Task<IReadOnlyList<DocumentRecord>> GetAllAsync()
     {
-        await _lock.WaitAsync();
-        try
-        {
-            return (await ReadIndexAsync())
-                .OrderByDescending(document => document.UploadedAt)
-                .ToList();
-        }
-        finally
-        {
-            _lock.Release();
-        }
+        var documents = await _database.Documents
+            .AsNoTracking()
+            .ToListAsync();
+
+        return documents
+            .OrderByDescending(document => document.UploadedAt)
+            .ToList();
     }
 
     public async Task<DocumentRecord?> FindAsync(int id)
     {
-        var documents = await GetAllAsync();
-        return documents.FirstOrDefault(document => document.Id == id);
+        return await _database.Documents.FindAsync(id);
     }
 
     public Task<Stream> OpenReadAsync(DocumentRecord document)
@@ -94,41 +79,13 @@ public sealed class DocumentRepository : IDocumentRepository
 
     public async Task DeleteAsync(DocumentRecord document)
     {
-        await _lock.WaitAsync();
-        try
+        _database.Documents.Remove(document);
+        await _database.SaveChangesAsync();
+
+        var file = GetStoredPath(document);
+        if (File.Exists(file))
         {
-            var documents = await ReadIndexAsync();
-            documents.RemoveAll(item => item.Id == document.Id);
-            await WriteIndexAsync(documents);
-
-            var file = GetStoredPath(document);
-            if (File.Exists(file))
-            {
-                File.Delete(file);
-            }
+            File.Delete(file);
         }
-        finally
-        {
-            _lock.Release();
-        }
-    }
-
-    private async Task<List<DocumentRecord>> ReadIndexAsync()
-    {
-        if (!File.Exists(_indexFile))
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(_indexFile)!);
-            await WriteIndexAsync(new List<DocumentRecord>());
-        }
-
-        await using var stream = File.OpenRead(_indexFile);
-        return await JsonSerializer.DeserializeAsync<List<DocumentRecord>>(stream) ?? new List<DocumentRecord>();
-    }
-
-    private async Task WriteIndexAsync(List<DocumentRecord> documents)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(_indexFile)!);
-        await using var stream = File.Create(_indexFile);
-        await JsonSerializer.SerializeAsync(stream, documents, JsonOptions);
     }
 }

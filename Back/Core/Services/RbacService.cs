@@ -23,7 +23,7 @@ public sealed class RbacService : IRbacService
                     Permissions.DownloadOwnDocuments,
                     Permissions.DownloadAllDocuments,
                     Permissions.DeleteDocuments,
-                    Permissions.ExportOidc,
+                    Permissions.ExportGoogleDrive,
                     Permissions.ExportM2M,
                     Permissions.ManageRoles,
                     Permissions.ViewAudit
@@ -32,14 +32,13 @@ public sealed class RbacService : IRbacService
             [AppRoles.Manager] = new RoleDefinition
             {
                 Name = AppRoles.Manager,
-                Description = "Gerencia o acervo e acompanha atividades.",
+                Description = "Gerencia documentos e exportacoes.",
                 Permissions = new[]
                 {
                     Permissions.UploadDocument,
                     Permissions.ViewAllDocuments,
                     Permissions.DownloadAllDocuments,
-                    Permissions.ExportOidc,
-                    Permissions.ViewAudit
+                    Permissions.ExportGoogleDrive
                 }
             },
             [AppRoles.User] = new RoleDefinition
@@ -51,16 +50,15 @@ public sealed class RbacService : IRbacService
                     Permissions.UploadDocument,
                     Permissions.ViewOwnDocuments,
                     Permissions.DownloadOwnDocuments,
-                    Permissions.ExportOidc
+                    Permissions.ExportGoogleDrive
                 }
             },
             [AppRoles.Auditor] = new RoleDefinition
             {
                 Name = AppRoles.Auditor,
-                Description = "Consulta documentos e trilha de auditoria sem alterar dados.",
+                Description = "Consulta apenas a trilha de auditoria sem alterar dados.",
                 Permissions = new[]
                 {
-                    Permissions.ViewAllDocuments,
                     Permissions.ViewAudit
                 }
             },

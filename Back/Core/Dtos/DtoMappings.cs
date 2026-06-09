@@ -8,17 +8,18 @@ public static class DtoMappings
         this DocumentRecord document,
         bool canDownload = false,
         bool canDelete = false,
-        bool canExportOidc = false) => new()
+        bool canExportGoogleDrive = false) => new()
     {
         Id = document.Id,
         OriginalFileName = document.OriginalFileName,
         ContentType = document.ContentType,
+        SizeInBytes = document.SizeInBytes,
         OwnerUserName = document.OwnerUserName,
         Sensitivity = document.Sensitivity,
         UploadedAt = document.UploadedAt,
         CanDownload = canDownload,
         CanDelete = canDelete,
-        CanExportOidc = canExportOidc
+        CanExportGoogleDrive = canExportGoogleDrive
     };
 
     public static RoleDto ToDto(this RoleDefinition role) => new()

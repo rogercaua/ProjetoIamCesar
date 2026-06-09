@@ -1,0 +1,136 @@
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.csproj.AssemblyReference.cache
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.AssemblyInfoInputs.cache
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.AssemblyInfo.cs
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.csproj.CoreCompileInputs.cache
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.sourcelink.json
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\NuGet.config
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\appsettings.Development.json
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\appsettings.json
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\global.json
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\DocumentPortalIam.exe
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\DocumentPortalIam.deps.json
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\DocumentPortalIam.runtimeconfig.json
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\DocumentPortalIam.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\DocumentPortalIam.pdb
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Google.Apis.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Google.Apis.Auth.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Google.Apis.Core.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Google.Apis.Drive.v3.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.OpenIdConnect.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.Data.Sqlite.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Sqlite.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.Extensions.Caching.Memory.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Microsoft.OpenApi.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Novell.Directory.Ldap.NETStandard.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\SQLitePCLRaw.batteries_v2.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\SQLitePCLRaw.core.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\SQLitePCLRaw.provider.e_sqlite3.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Swashbuckle.AspNetCore.Annotations.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\System.CodeDom.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\System.Management.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\browser-wasm\nativeassets\net8.0\e_sqlite3.a
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-arm\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-arm64\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-armel\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-mips64\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-musl-arm\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-musl-arm64\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-musl-x64\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-ppc64le\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-s390x\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-x64\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\linux-x86\native\libe_sqlite3.so
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\maccatalyst-arm64\native\libe_sqlite3.dylib
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\maccatalyst-x64\native\libe_sqlite3.dylib
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\osx-arm64\native\libe_sqlite3.dylib
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\osx-x64\native\libe_sqlite3.dylib
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\win-arm\native\e_sqlite3.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\win-arm64\native\e_sqlite3.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\win-x64\native\e_sqlite3.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\win-x86\native\e_sqlite3.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Management.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\staticwebassets.development.json
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\staticwebassets\msbuild.DocumentPortalIam.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\staticwebassets\msbuild.build.DocumentPortalIam.props
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.DocumentPortalIam.props
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.DocumentPortalIam.props
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\staticwebassets.pack.json
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\scopedcss\bundle\DocumentPortalIam.styles.css
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\Document.77DDCAA8.Up2Date
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\refint\DocumentPortalIam.dll
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.pdb
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\DocumentPortalIam.genruntimeconfig.cache
+C:\Users\roger\OneDrive\Documentos\Projeto IAM C#\obj\Debug\net8.0\ref\DocumentPortalIam.dll
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22175beb793a499fa18026db248c1aa6\NuGet.config
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22175beb793a499fa18026db248c1aa6\appsettings.Development.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22175beb793a499fa18026db248c1aa6\appsettings.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22175beb793a499fa18026db248c1aa6\global.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22175beb793a499fa18026db248c1aa6\DocumentPortalIam.deps.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22175beb793a499fa18026db248c1aa6\DocumentPortalIam.runtimeconfig.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22175beb793a499fa18026db248c1aa6\DocumentPortalIam.dll
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22175beb793a499fa18026db248c1aa6\DocumentPortalIam.pdb
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22fa033ac6e741ca8b8df7acc152d8e1\NuGet.config
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22fa033ac6e741ca8b8df7acc152d8e1\appsettings.Development.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22fa033ac6e741ca8b8df7acc152d8e1\appsettings.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22fa033ac6e741ca8b8df7acc152d8e1\global.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22fa033ac6e741ca8b8df7acc152d8e1\DocumentPortalIam.deps.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22fa033ac6e741ca8b8df7acc152d8e1\DocumentPortalIam.runtimeconfig.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22fa033ac6e741ca8b8df7acc152d8e1\DocumentPortalIam.dll
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-22fa033ac6e741ca8b8df7acc152d8e1\DocumentPortalIam.pdb
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-c7bbf831873e429b980dea6a0dc555be\NuGet.config
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-c7bbf831873e429b980dea6a0dc555be\appsettings.Development.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-c7bbf831873e429b980dea6a0dc555be\appsettings.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-c7bbf831873e429b980dea6a0dc555be\global.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-c7bbf831873e429b980dea6a0dc555be\DocumentPortalIam.deps.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-c7bbf831873e429b980dea6a0dc555be\DocumentPortalIam.runtimeconfig.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-c7bbf831873e429b980dea6a0dc555be\DocumentPortalIam.dll
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-c7bbf831873e429b980dea6a0dc555be\DocumentPortalIam.pdb
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-9d456d21f4ec43b9abac7e9bff4d4e32\NuGet.config
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-9d456d21f4ec43b9abac7e9bff4d4e32\appsettings.Development.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-9d456d21f4ec43b9abac7e9bff4d4e32\appsettings.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-9d456d21f4ec43b9abac7e9bff4d4e32\global.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-9d456d21f4ec43b9abac7e9bff4d4e32\DocumentPortalIam.deps.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-9d456d21f4ec43b9abac7e9bff4d4e32\DocumentPortalIam.runtimeconfig.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-9d456d21f4ec43b9abac7e9bff4d4e32\DocumentPortalIam.dll
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-9d456d21f4ec43b9abac7e9bff4d4e32\DocumentPortalIam.pdb
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-e3343f518fca41119e9c61754468117e\NuGet.config
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-e3343f518fca41119e9c61754468117e\appsettings.Development.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-e3343f518fca41119e9c61754468117e\appsettings.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-e3343f518fca41119e9c61754468117e\global.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-e3343f518fca41119e9c61754468117e\DocumentPortalIam.deps.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-e3343f518fca41119e9c61754468117e\DocumentPortalIam.runtimeconfig.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-e3343f518fca41119e9c61754468117e\DocumentPortalIam.dll
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-e3343f518fca41119e9c61754468117e\DocumentPortalIam.pdb
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\NuGet.config
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\appsettings.Development.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\appsettings.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\global.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\DocumentPortalIam.deps.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\DocumentPortalIam.runtimeconfig.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\DocumentPortalIam.dll
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\DocumentPortalIam.pdb

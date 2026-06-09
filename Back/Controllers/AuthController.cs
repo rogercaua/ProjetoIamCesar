@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Security.Claims;
 using DocumentPortalIam.Back.Core.Dtos;
 using DocumentPortalIam.Back.Core.Services;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DocumentPortalIam.Back.Controllers;
 
@@ -25,12 +27,21 @@ public sealed class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<ActionResult<AuthenticatedUserDto>> Login(LoginRequestDto request)
+    [SwaggerOperation(
+        Summary = "Login LDAP real.",
+        Description = "Publico. Autentica no servidor LDAP configurado, cria cookie de sessao e retorna papeis/permissoes RBAC.")]
+    public async Task<ActionResult<AuthenticatedUserDto>> Login()
     {
+        var request = await ReadLoginRequestAsync();
         var user = await _directory.AuthenticateAsync(request.UserName.Trim(), request.Password);
         if (user is null)
         {
             await _audit.WriteAsync("ldap.login.failed", request.UserName, "Falha de autenticacao via API.");
+            if (IsHtmlFormRequest())
+            {
+                return Redirect("/?erro=login");
+            }
+
             return Unauthorized(new MessageResponseDto { Message = "Usuario ou senha invalidos." });
         }
 
@@ -48,11 +59,19 @@ public sealed class AuthController : ControllerBase
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
         await _audit.WriteAsync("ldap.login.success", user.UserName, $"Login LDAP via API com papel: {string.Join(", ", user.Roles)}.");
 
+        if (IsHtmlFormRequest())
+        {
+            return Redirect("/dashboard");
+        }
+
         return Ok(user.ToAuthenticatedDto(_rbac.GetPermissions(principal)));
     }
 
     [HttpGet("me")]
     [Authorize]
+    [SwaggerOperation(
+        Summary = "Consulta a sessao atual.",
+        Description = "Usuario logado. Retorna usuario, e-mail, roles LDAP e permissoes RBAC carregadas no cookie.")]
     public ActionResult<AuthenticatedUserDto> Me()
     {
         return Ok(new AuthenticatedUserDto
@@ -67,11 +86,44 @@ public sealed class AuthController : ControllerBase
 
     [HttpPost("logout")]
     [Authorize]
+    [SwaggerOperation(
+        Summary = "Encerra sessao.",
+        Description = "Usuario logado. Remove o cookie de autenticacao da aplicacao.")]
     public async Task<ActionResult<MessageResponseDto>> Logout()
     {
         var actor = User.Identity?.Name ?? "anonymous";
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         await _audit.WriteAsync("session.logout", actor, "Sessao encerrada via API.");
+
+        if (IsHtmlFormRequest())
+        {
+            return Redirect("/");
+        }
+
         return Ok(new MessageResponseDto { Message = "Sessao encerrada." });
+    }
+
+    private async Task<LoginRequestDto> ReadLoginRequestAsync()
+    {
+        if (Request.HasFormContentType)
+        {
+            var form = await Request.ReadFormAsync();
+            return new LoginRequestDto
+            {
+                UserName = form["userName"].ToString(),
+                Password = form["password"].ToString()
+            };
+        }
+
+        return await JsonSerializer.DeserializeAsync<LoginRequestDto>(
+            Request.Body,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+            ?? new LoginRequestDto();
+    }
+
+    private bool IsHtmlFormRequest()
+    {
+        return Request.HasFormContentType
+            || Request.Headers.Accept.ToString().Contains("text/html", StringComparison.OrdinalIgnoreCase);
     }
 }

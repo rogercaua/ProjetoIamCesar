@@ -4,16 +4,67 @@ Projeto pratico de Gestao de Identidade e Acesso em C# para um Sistema de Gestao
 
 ## O que foi implementado
 
-- Login centralizado por LDAP demo em `Data/demo-ldap-users.json`.
+- Login centralizado em servidor LDAP real, configurado em `appsettings.json`.
 - RBAC com papeis, recursos e permissoes em `Back/Core/Services/RbacService.cs`.
-- Back-end organizado com `Back/Controllers` e `Back/Core`.
-- Front-end separado em `Front/Pages` e `Front/wwwroot`.
-- Swagger/OpenAPI documentado em `/swagger` e `/swagger/v1/swagger.json`.
-- Upload, listagem, download e exclusao de documentos.
-- Governanca simples: administrador altera o papel do usuario no diretorio.
-- Exportacao OIDC demo para "Google Drive" local.
-- API OAuth2 Machine-to-Machine com client credentials para exportar documento para storage externo local.
-- Auditoria de login, upload, download, troca de papel e exportacoes.
+- Controllers/API em `Back/Controllers`.
+- Cookie Authentication para manter a sessao do usuario.
+- OpenID Connect para conectar uma conta Google.
+- Google Drive API para exportar documento para o Drive conectado.
+- SQLite com EF Core para metadados dos documentos e logs de auditoria.
+- Arquivos fisicos em `Storage/Documents`.
+- OAuth2 Machine-to-Machine para exportacao tecnica.
+- Swagger UI em `/swagger` para testar endpoints.
+- Front estatico em HTML, CSS e Bootstrap simples, sem Razor.
+
+## Configurar antes de rodar
+
+Edite o `appsettings.json`:
+
+```json
+"Ldap": {
+  "Host": "3.17.68.102",
+  "Port": 389,
+  "BaseDn": "dc=projetoiam,dc=local",
+  "UsersOu": "ou=users",
+  "GroupsOu": "ou=groups",
+  "AdminDn": "cn=admin,dc=projetoiam,dc=local",
+  "AdminPassword": "admin123"
+}
+```
+
+Usuarios LDAP existentes:
+
+| Usuario | Senha | Grupo LDAP | Papel na aplicacao |
+|---|---|---|---|
+| `admin` | `Admin@123` | `Administradores` | Administrador |
+| `gestor` | `Gestor@123` | `Gestores` | Gestor |
+| `aluno` | `Aluno@123` | `Usuarios` | Usuario |
+| `auditor` | `Auditor@123` | `Auditores` | Auditor |
+
+O projeto tambem deixa configurados os campos auxiliares:
+
+```json
+"Ldap": {
+  "UseSsl": false,
+  "UserSearchFilter": "(uid={0})",
+  "UserNameAttribute": "uid",
+  "DisplayNameAttribute": "cn",
+  "EmailAttribute": "mail",
+  "GroupNameAttribute": "cn",
+  "GroupMemberAttribute": "member"
+}
+```
+
+Para Google Drive, configure tambem:
+
+```json
+"Google": {
+  "ClientId": "seu-client-id",
+  "ClientSecret": "seu-client-secret"
+}
+```
+
+No Google Cloud Console, use `http://localhost:5169/signin-google` como redirect URI.
 
 ## Como rodar
 
@@ -22,27 +73,26 @@ dotnet restore
 dotnet run --urls http://localhost:5169
 ```
 
-Abra `http://localhost:5169`.
-
-Swagger:
+Abra:
 
 ```text
+http://localhost:5169
 http://localhost:5169/swagger
-http://localhost:5169/swagger/v1/swagger.json
 ```
 
-## Usuarios de demonstracao
+## Fluxo de uso
 
-| Usuario | Senha | Papel inicial |
-|---|---|---|
-| admin | Admin@123 | Administrador |
-| gestor | Gestor@123 | Gestor |
-| aluno | Aluno@123 | Usuario |
-| auditor | Auditor@123 | Auditor |
+1. Entre com usuario e senha existentes no LDAP do EC2.
+2. Envie um documento pelo front.
+3. Veja a listagem mudando conforme o papel RBAC.
+4. Conecte uma conta Google.
+5. Exporte o documento para Google Drive.
+6. Teste os endpoints no Swagger.
+7. Execute o fluxo M2M com token OAuth2.
 
 ## Fluxo M2M OAuth2
 
-Com a aplicacao rodando e pelo menos um documento cadastrado, execute:
+Com a aplicacao rodando e pelo menos um documento cadastrado:
 
 ```powershell
 $token = Invoke-RestMethod `
@@ -60,26 +110,23 @@ Invoke-RestMethod `
 ## Pastas importantes
 
 - `Back/Controllers/` - endpoints da API usando DTOs.
+- `Back/Core/Data/` - contexto EF Core/SQLite.
 - `Back/Core/Dtos/` - objetos de entrada e saida da API.
-- `Back/Core/Services/` - interfaces e implementacoes das regras IAM, diretorio, auditoria e exportacoes.
-- `Back/Core/Models/` - entidades simples do projeto.
-- `Front/Pages/` - telas Razor Pages.
-- `Front/wwwroot/` - CSS, JS e bibliotecas estaticas do front.
-- `Storage/` - criada em tempo de execucao para documentos, auditoria e exportacoes.
+- `Back/Core/Services/` - interfaces e implementacoes de LDAP, RBAC, documentos, auditoria e exportacoes.
+- `Back/Core/Models/` - entidades do projeto.
+- `Front/wwwroot/` - HTML, CSS e Bootstrap.
+- `Storage/` - criada em tempo de execucao para banco SQLite, chaves, arquivos e exportacoes.
 - `docs/` - diagrama, relatorio, roteiro de video e exemplo M2M.
-
-## Observacao sobre o LDAP demo
-
-Para manter o projeto simples e executavel em qualquer maquina, o LDAP foi representado por um diretorio local em JSON. A classe `DemoLdapDirectoryService` centraliza autenticacao e papeis, como um servidor LDAP faria em laboratorio. Em uma implantacao real, esta classe seria trocada por um bind LDAP usando servidor corporativo.
 
 ## Principais controllers
 
 | Controller | Rota base | Funcao |
 |---|---|---|
-| `AuthController` | `/api/auth` | Login, logout e dados da sessao |
-| `DocumentsController` | `/api/documents` | Listar, enviar, baixar, excluir e exportar OIDC |
-| `UsersController` | `/api/users` | Consultar usuarios e alterar papel |
+| `AuthController` | `/api/auth` | Login LDAP, logout e dados da sessao |
+| `GoogleController` | `/api/google` | Conectar/desconectar conta Google via OIDC |
+| `DocumentsController` | `/api/documents` | Listar, enviar, baixar, excluir e exportar para Google Drive |
+| `UsersController` | `/api/users` | Consultar usuarios LDAP e alterar papel |
 | `RbacController` | `/api/rbac` | Consultar matriz de papeis |
-| `AuditController` | `/api/audit` | Consultar eventos de auditoria |
+| `AuditController` | `/api/audit` | Consultar eventos de auditoria no SQLite |
 | `OAuthController` | `/api/oauth/token` | Emitir token M2M |
 | `M2MController` | `/api/m2m/export/{id}` | Exportar documento com token Bearer |

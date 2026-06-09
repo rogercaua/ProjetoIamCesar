@@ -5,12 +5,13 @@ public sealed class DocumentDto
     public int Id { get; set; }
     public string OriginalFileName { get; set; } = "";
     public string ContentType { get; set; } = "";
+    public long SizeInBytes { get; set; }
     public string OwnerUserName { get; set; } = "";
     public string Sensitivity { get; set; } = "";
     public DateTimeOffset UploadedAt { get; set; }
     public bool CanDownload { get; set; }
     public bool CanDelete { get; set; }
-    public bool CanExportOidc { get; set; }
+    public bool CanExportGoogleDrive { get; set; }
 }
 
 public sealed class UploadDocumentRequestDto
@@ -19,9 +20,9 @@ public sealed class UploadDocumentRequestDto
     public string Sensitivity { get; set; } = "Interno";
 }
 
-public sealed class OidcExportRequestDto
+public sealed class GoogleDriveExportRequestDto
 {
-    public string ProviderAccount { get; set; } = "";
+    public string DriveFileName { get; set; } = "";
 }
 
 public sealed class ExportResultDto

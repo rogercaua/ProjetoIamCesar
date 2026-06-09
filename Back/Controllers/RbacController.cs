@@ -1,6 +1,7 @@
 using DocumentPortalIam.Back.Core.Dtos;
 using DocumentPortalIam.Back.Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DocumentPortalIam.Back.Controllers;
 
@@ -16,6 +17,9 @@ public sealed class RbacController : ControllerBase
     }
 
     [HttpGet("roles")]
+    [SwaggerOperation(
+        Summary = "Mostra a matriz RBAC.",
+        Description = "Publico. Lista os papeis da aplicacao e suas permissoes.")]
     public ActionResult<IReadOnlyList<RoleDto>> GetRoles()
     {
         return Ok(_rbac.Roles.Select(role => role.ToDto()).ToList());

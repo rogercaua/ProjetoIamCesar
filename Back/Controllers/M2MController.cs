@@ -3,6 +3,7 @@ using DocumentPortalIam.Back.Core.Models;
 using DocumentPortalIam.Back.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DocumentPortalIam.Back.Controllers;
 
@@ -29,6 +30,9 @@ public sealed class M2MController : ControllerBase
 
     [HttpPost("export/{id:int}")]
     [AllowAnonymous]
+    [SwaggerOperation(
+        Summary = "Exporta documento por OAuth2 M2M.",
+        Description = "Requer Bearer token emitido em /api/oauth/token com escopo exports.m2m. Exporta para storage externo local.")]
     public async Task<ActionResult<ExportResultDto>> Export(int id)
     {
         var authorization = Request.Headers.Authorization.ToString();

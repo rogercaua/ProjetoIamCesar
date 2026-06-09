@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portal IAM Docs - Login</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/site.css?v=20260609-2">
+</head>
+<body>
+    <header class="topbar bg-white border-bottom">
+        <div class="container topbar-inner d-flex align-items-center justify-content-between py-3">
+            <a class="brand" href="/">Portal IAM Docs</a>
+            <a class="nav-link-clean" href="/swagger">Swagger</a>
+        </div>
+    </header>
+
+    <main class="container page-shell py-5">
+        <section class="hero-grid align-items-center">
+            <div class="hero-copy">
+                <p class="eyebrow">Gestao de documentos com IAM</p>
+                <h1>Login centralizado pelo LDAP da EC2</h1>
+                <p class="lead-text">
+                    A sessao e criada por cookie e os grupos LDAP definem as permissoes RBAC da aplicacao.
+                </p>
+            </div>
+
+            <form class="panel login-card bg-white border rounded-3 p-4 shadow-sm" action="/api/auth/login" method="post">
+                <h2>Entrar</h2>
+                <label for="userName">Usuario</label>
+                <input id="userName" name="userName" class="form-control" autocomplete="username" required>
+
+                <label for="password">Senha</label>
+                <input id="password" name="password" class="form-control" type="password" autocomplete="current-password" required>
+
+                <button class="btn-main" type="submit">Acessar portal</button>
+
+                <div class="hint-list">
+                    <span>admin / Admin@123</span>
+                    <span>gestor / Gestor@123</span>
+                    <span>aluno / Aluno@123</span>
+                    <span>auditor / Auditor@123</span>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

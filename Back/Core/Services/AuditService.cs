@@ -1,63 +1,40 @@
-using System.Text.Json;
+using DocumentPortalIam.Back.Core.Data;
 using DocumentPortalIam.Back.Core.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DocumentPortalIam.Back.Core.Services;
 
 public sealed class AuditService : IAuditService
 {
-    private readonly string _auditFile;
-    private readonly SemaphoreSlim _lock = new(1, 1);
+    private readonly AppDbContext _database;
 
-    public AuditService(IWebHostEnvironment environment)
+    public AuditService(AppDbContext database)
     {
-        _auditFile = Path.Combine(environment.ContentRootPath, "Storage", "audit.log");
+        _database = database;
     }
 
     public async Task WriteAsync(string action, string actor, string details)
     {
-        var record = new AuditRecord
+        _database.AuditLogs.Add(new AuditRecord
         {
+            Timestamp = DateTimeOffset.UtcNow,
             Action = action,
             Actor = string.IsNullOrWhiteSpace(actor) ? "anonymous" : actor,
             Details = details
-        };
+        });
 
-        await _lock.WaitAsync();
-        try
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(_auditFile)!);
-            await File.AppendAllTextAsync(_auditFile, JsonSerializer.Serialize(record) + Environment.NewLine);
-        }
-        finally
-        {
-            _lock.Release();
-        }
+        await _database.SaveChangesAsync();
     }
 
     public async Task<IReadOnlyList<AuditRecord>> GetRecentAsync(int limit = 80)
     {
-        if (!File.Exists(_auditFile))
-        {
-            return Array.Empty<AuditRecord>();
-        }
+        var records = await _database.AuditLogs
+            .AsNoTracking()
+            .ToListAsync();
 
-        var lines = await File.ReadAllLinesAsync(_auditFile);
-        return lines
-            .Reverse()
+        return records
+            .OrderByDescending(record => record.Timestamp)
             .Take(limit)
-            .Select(line =>
-            {
-                try
-                {
-                    return JsonSerializer.Deserialize<AuditRecord>(line);
-                }
-                catch
-                {
-                    return null;
-                }
-            })
-            .Where(record => record is not null)
-            .Cast<AuditRecord>()
             .ToList();
     }
 }

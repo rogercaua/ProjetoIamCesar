@@ -6,37 +6,40 @@ Projeto: Sistema de Gestao de Documentos com IAM.
 
 Integrantes: preencher com os nomes do grupo antes da entrega.
 
-Linguagem e plataforma: C#, ASP.NET Core Razor Pages, .NET 8.
+Linguagem e plataforma: C#, ASP.NET Core Web API, .NET 8, HTML, CSS e Bootstrap.
 
 ## Objetivo
 
-O projeto implementa um portal simples de upload e download de documentos com controles de identidade e acesso. O foco e demonstrar autenticacao centralizada, autorizacao por RBAC, exportacao OIDC e autorizacao M2M com OAuth2.
+O projeto implementa um portal simples de upload, download e exportacao de documentos com controles de identidade e acesso. O foco e demonstrar autenticacao centralizada, RBAC, OpenID Connect com Google, Google Drive API, OAuth2 M2M e governanca.
 
 ## Arquitetura
 
 A aplicacao foi organizada em camadas simples:
 
 - `Back/Controllers/`: rotas de API documentadas no Swagger.
+- `Back/Core/Data/`: `AppDbContext` com EF Core e SQLite.
 - `Back/Core/Dtos/`: objetos de entrada e saida usados pelos controllers.
-- `Back/Core/Services/`: interfaces e implementacoes de autenticacao, RBAC, documentos, auditoria e exportacoes.
-- `Back/Core/Models/`: entidades de usuario, documento, auditoria e definicao RBAC.
-- `Front/Pages/`: telas Razor Pages para login, documentos, usuarios, auditoria e exportacao OIDC.
+- `Back/Core/Services/`: interfaces e implementacoes de LDAP, RBAC, documentos, auditoria e exportacoes.
+- `Back/Core/Models/`: entidades de documento, auditoria, usuario e RBAC.
+- `Front/wwwroot/`: front estatico com HTML, CSS e Bootstrap, sem Razor.
 
-O armazenamento e local para fins didaticos. Documentos e trilhas de auditoria sao criados na pasta `Storage/` durante a execucao.
+Os metadados dos documentos e os logs de auditoria ficam no SQLite em `Storage/iam-documents.db`. Os arquivos enviados ficam fisicamente em `Storage/Documents`.
 
 ## Autenticacao centralizada LDAP
 
-A autenticacao esta em `Back/Core/Services/DemoLdapDirectoryService.cs`. Para manter o projeto executavel sem servidor externo, o diretorio LDAP foi representado por `Data/demo-ldap-users.json`.
+A autenticacao esta em `Back/Core/Services/LdapDirectoryService.cs`, usando a biblioteca `Novell.Directory.Ldap.NETStandard`.
 
 Fluxo logico:
 
-1. O usuario informa login e senha em `Front/Pages/Account/Login`.
-2. A aplicacao consulta o diretorio demo por `IDirectoryService.AuthenticateAsync`.
-3. Se as credenciais forem validas, a aplicacao cria uma sessao por cookie.
-4. Os papeis vindos do diretorio sao colocados como claims de role.
-5. A auditoria registra sucesso ou falha de login.
-
-Em um ambiente real, a classe de diretorio pode ser substituida por bind LDAP contra Active Directory, OpenLDAP ou outro diretorio corporativo.
+1. O usuario informa login e senha no `Front/wwwroot/index.html`.
+2. O front envia `POST /api/auth/login`.
+3. O backend faz bind de servico no LDAP configurado no EC2.
+4. O backend busca o usuario com `UserSearchFilter`, por exemplo `(uid={0})`.
+5. O backend tenta bind com o DN do usuario e a senha informada.
+6. Se o bind for valido, a aplicacao cria cookie de sessao.
+7. A aplicacao busca os grupos do usuario em `ou=groups`.
+8. Os grupos `Administradores`, `Gestores`, `Usuarios` e `Auditores` viram claims de role.
+9. A auditoria grava o evento no SQLite.
 
 ## Modelagem RBAC
 
@@ -45,9 +48,9 @@ A matriz RBAC esta em `Back/Core/Services/RbacService.cs`. Os papeis sao:
 | Papel | Finalidade |
 |---|---|
 | Administrador | Controle total, inclusive governanca de usuarios |
-| Gestor | Gerencia documentos e acompanha auditoria |
+| Gestor | Gerencia documentos e exportacoes |
 | Usuario | Opera apenas os proprios documentos |
-| Auditor | Consulta documentos e eventos sem alterar dados |
+| Auditor | Consulta apenas eventos de auditoria sem alterar dados |
 | ServicoM2M | Conta tecnica para exportacao por API |
 
 Permissoes principais:
@@ -58,33 +61,30 @@ Permissoes principais:
 - `documents.download.own`
 - `documents.download.all`
 - `documents.delete`
-- `exports.oidc`
+- `exports.google_drive`
 - `exports.m2m`
 - `users.manage.roles`
 - `audit.view`
 
-A verificacao e feita antes de cada acao sensivel. Por exemplo, o usuario comum so consegue ver e baixar documentos em que `OwnerUserName` seja igual ao nome da sessao.
+A verificacao acontece antes de cada acao sensivel. Por exemplo, usuario comum so ve documentos cujo `OwnerUserName` seja igual ao nome da sessao.
 
 ## Governanca de acesso
 
-A tela `Front/Pages/Admin/Users` permite ao administrador alterar o papel de cada usuario no diretorio demo. A mudanca fica registrada em `Data/demo-ldap-users.json` e passa a valer no proximo login do usuario.
+O endpoint `PUT /api/users/{userName}/role` permite que apenas Administrador altere o papel do usuario no LDAP. A alteracao remove o DN do usuario dos grupos de papel e adiciona no grupo correspondente ao novo papel. A mudanca passa a valer no proximo login.
 
-Esse fluxo demonstra o conceito de governanca: identidade e papel ficam centralizados, enquanto a aplicacao consome esses atributos para decidir acesso.
+## OpenID Connect e Google Drive
 
-## Integracao OIDC
-
-A exportacao OIDC esta em `Front/Pages/Exports/Oidc` e `Back/Core/Services/OidcExportService.cs`.
+A conexao Google esta em `Back/Controllers/GoogleController.cs`, usando `Microsoft.AspNetCore.Authentication.OpenIdConnect`.
 
 Fluxo logico:
 
-1. Usuario autenticado escolhe um documento.
-2. A aplicacao verifica `exports.oidc` e permissao de visualizar o documento.
-3. A tela apresenta uma conta Google demo e pede consentimento.
-4. O servico copia o arquivo para `Storage/external/oidc-google-drive`.
-5. Um artefato JSON e gerado com protocolo, provedor e claims simuladas de ID token.
-6. A auditoria registra a exportacao.
-
-O objetivo e demonstrar o papel do OIDC: identificar o usuario externo e associar a exportacao a uma identidade autenticada pelo provedor.
+1. Usuario autenticado no LDAP chama `GET /api/google/connect`.
+2. A aplicacao redireciona para o Google via OpenID Connect.
+3. O Google retorna para `/signin-google`.
+4. O token externo fica em um cookie separado chamado `DocumentPortalIam.Google`.
+5. O usuario chama `POST /api/documents/{id}/export/google-drive`.
+6. `GoogleDriveExportService` usa o access token e a Google Drive API para enviar o arquivo.
+7. A auditoria registra a exportacao no SQLite.
 
 ## OAuth2 M2M
 
@@ -99,14 +99,14 @@ Fluxo logico:
 5. O documento e copiado para `Storage/external/m2m-storage`.
 6. A auditoria registra emissao do token e exportacao.
 
-Credenciais demo:
+Credenciais M2M usadas no projeto:
 
 - `client_id`: `storage-client`
 - `client_secret`: `M2M@123`
 
 ## Auditoria
 
-O servico `AuditService` grava eventos em `Storage/audit.log`. A tela `Front/Pages/Audit/Index` mostra eventos recentes para papeis com `audit.view`.
+O servico `AuditService` grava eventos na tabela `AuditLogs` do SQLite. O endpoint `GET /api/audit` mostra eventos recentes para papeis com `audit.view`.
 
 Eventos registrados:
 
@@ -117,25 +117,27 @@ Eventos registrados:
 - exclusao
 - troca de papel
 - emissao de token M2M
-- exportacao OIDC
+- exportacao Google Drive
 - exportacao M2M
 
 ## Bibliotecas utilizadas
 
-- ASP.NET Core Razor Pages: telas web e rotas.
-- Microsoft.AspNetCore.Authentication.Cookies: sessao autenticada por cookie.
-- System.Text.Json: leitura e gravacao de dados locais.
-- System.Security.Cryptography: geracao de token aleatorio para M2M.
-
-Nao foram adicionados pacotes NuGet externos para manter o projeto simples.
+- `Microsoft.AspNetCore.Authentication.Cookies`: sessao autenticada por cookie.
+- `Microsoft.AspNetCore.Authentication.OpenIdConnect`: conexao Google via OIDC.
+- `Novell.Directory.Ldap.NETStandard`: autenticacao e consulta LDAP real.
+- `Microsoft.EntityFrameworkCore.Sqlite`: SQLite para documentos e auditoria.
+- `Google.Apis.Drive.v3`: exportacao para Google Drive.
+- `Swashbuckle.AspNetCore`: Swagger UI para testar endpoints.
+- `System.Security.Cryptography`: geracao de token aleatorio para M2M.
 
 ## Como demonstrar
 
 1. Rodar a aplicacao com `dotnet run --urls http://localhost:5169`.
-2. Entrar como `admin` e enviar um documento.
-3. Entrar como `aluno` e mostrar que ele so ve os proprios documentos.
-4. Voltar como `admin`, alterar o papel do aluno para `Gestor`.
-5. Fazer novo login como `aluno` e mostrar que agora ele ve todos os documentos.
-6. Exportar um documento via OIDC.
-7. Executar o fluxo M2M pelo PowerShell com token OAuth2.
-8. Abrir a auditoria e mostrar os eventos gerados.
+2. Entrar com usuario LDAP do EC2.
+3. Enviar um documento.
+4. Mostrar que o RBAC muda listagem/acoes conforme o papel.
+5. Conectar Google por OIDC.
+6. Exportar documento para Google Drive.
+7. Executar o fluxo M2M pelo PowerShell.
+8. Abrir `/swagger` e testar endpoints.
+9. Abrir auditoria e mostrar os eventos gravados no SQLite.

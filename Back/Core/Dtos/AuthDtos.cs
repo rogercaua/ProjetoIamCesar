@@ -47,3 +47,10 @@ public sealed class TokenResponseDto
 
     public string Scope { get; set; } = "";
 }
+
+public sealed class GoogleConnectionDto
+{
+    public bool Connected { get; set; }
+    public string Email { get; set; } = "";
+    public string Name { get; set; } = "";
+}

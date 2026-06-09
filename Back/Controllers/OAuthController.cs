@@ -3,6 +3,7 @@ using DocumentPortalIam.Back.Core.Dtos;
 using DocumentPortalIam.Back.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DocumentPortalIam.Back.Controllers;
 
@@ -21,6 +22,9 @@ public sealed class OAuthController : ControllerBase
 
     [HttpPost("token")]
     [AllowAnonymous]
+    [SwaggerOperation(
+        Summary = "Emite token OAuth2 M2M.",
+        Description = "Cliente tecnico. Recebe client_id/client_secret e emite Bearer token para exportacao M2M.")]
     public async Task<ActionResult<TokenResponseDto>> Token()
     {
         var request = await ReadClientCredentialsAsync();

@@ -3,6 +3,7 @@ using DocumentPortalIam.Back.Core.Models;
 using DocumentPortalIam.Back.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DocumentPortalIam.Back.Controllers;
 
@@ -21,6 +22,9 @@ public sealed class AuditController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Consulta logs de auditoria.",
+        Description = "Apenas Administrador e Auditor. Busca eventos gravados no SQLite.")]
     public async Task<ActionResult<IReadOnlyList<AuditRecordDto>>> GetRecent([FromQuery] int limit = 80)
     {
         if (!_rbac.HasPermission(User, Permissions.ViewAudit))
