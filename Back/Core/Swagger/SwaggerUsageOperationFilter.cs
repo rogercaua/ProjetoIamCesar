@@ -25,16 +25,12 @@ public sealed class SwaggerUsageOperationFilter : IOperationFilter
 
         if (controller == "M2M" && action == "Export")
         {
-            operation.Parameters ??= new List<IOpenApiParameter>();
-            operation.Parameters.Add(new OpenApiParameter
+            operation.Security ??= new List<OpenApiSecurityRequirement>();
+            operation.Security.Add(new OpenApiSecurityRequirement
             {
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Required = true,
-                Description = "Cole aqui: Bearer {access_token} obtido em POST /api/oauth/token.",
-                Schema = new OpenApiSchema
                 {
-                    Type = JsonSchemaType.String
+                    new OpenApiSecuritySchemeReference("Bearer", null!, null),
+                    new List<string>()
                 }
             });
         }

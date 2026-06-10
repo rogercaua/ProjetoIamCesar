@@ -2,207 +2,285 @@
 
 ## 1. Identificacao
 
-Projeto: Sistema de Gestao de Documentos com IAM.
+**Projeto:** Portal IAM Docs - Sistema de Gestao de Documentos com IAM.
 
-Integrantes: preencher com os nomes do grupo antes da entrega.
+**Disciplina:** Gestao de Identidade e Acesso.
 
-Linguagem e plataforma: C#, ASP.NET Core Web API, .NET 8, HTML, CSS, Bootstrap, EF Core, SQLite, LDAP, OpenID Connect e OAuth2.
+**Integrantes:** preencher com os nomes dos componentes do grupo antes da entrega.
+
+**Linguagem e plataforma:** C#, ASP.NET Core Web API, .NET 8, HTML, CSS, Bootstrap, SQLite, LDAP, OpenID Connect, Google Drive API e OAuth2.
 
 ## 2. Objetivo
 
-O projeto implementa um portal de documentos com controle de identidade e acesso. A aplicacao permite login por LDAP, upload e download de arquivos, exportacao para Google Drive, exportacao tecnica por OAuth2 M2M, controle de permissoes por RBAC e auditoria das acoes principais.
+O projeto implementa um portal de documentos com autenticacao, autorizacao e auditoria. A aplicacao permite que usuarios facam login usando um servidor LDAP real, acessem documentos conforme o papel RBAC, conectem uma conta Google por OpenID Connect, exportem documentos para o Google Drive e executem uma exportacao tecnica por OAuth2 Machine-to-Machine.
 
-O foco do projeto nao e uma regra de negocio complexa. O foco e mostrar como autenticar, autorizar e auditar usuarios de forma centralizada.
+O foco do projeto e demonstrar os conceitos de IAM em uma aplicacao funcional:
 
-## 3. Arquitetura
+- autenticacao centralizada;
+- autorizacao baseada em papeis;
+- governanca de acesso;
+- integracao federada;
+- autorizacao entre sistemas;
+- rastreabilidade por auditoria.
 
-A aplicacao foi separada em back-end, core e front:
+## 3. Visao Geral da Solucao
 
-| Camada | Pasta | Responsabilidade |
-|---|---|---|
-| Controllers/API | `Back/Controllers` | Receber requisicoes HTTP, validar permissao e chamar servicos |
-| Core/Data | `Back/Core/Data` | Configurar EF Core e SQLite |
-| Core/DTOs | `Back/Core/Dtos` | Padronizar entradas e respostas da API |
-| Core/Models | `Back/Core/Models` | Representar entidades e constantes do dominio |
-| Core/Services | `Back/Core/Services` | Implementar regras de LDAP, RBAC, documentos, auditoria e exportacoes |
-| Front | `Front/wwwroot` | Login e estilos em HTML/CSS/Bootstrap, sem Razor |
-| Storage | `Storage` | Banco SQLite, arquivos enviados e exportacoes |
+A regra de negocio escolhida foi um Sistema de Gestao de Documentos. A aplicacao permite upload, listagem, download, exclusao e exportacao de arquivos, com acesso controlado por perfil.
 
-O front de login e estatico. O painel `/dashboard` e renderizado pelo `PortalController` como HTML puro para mostrar dados reais do banco e do LDAP sem usar Razor e sem JavaScript.
+Principais componentes:
 
-## 4. Banco de dados e armazenamento
+| Componente | Uso no projeto |
+|---|---|
+| Front-end | HTML, CSS e Bootstrap em `Front/wwwroot` |
+| API | Controllers ASP.NET Core em `Back/Controllers` |
+| Core | Servicos, interfaces, modelos e DTOs em `Back/Core` |
+| LDAP | Autenticacao e grupos dos usuarios |
+| SQLite | Metadados de documentos e logs de auditoria |
+| Storage local | Arquivos fisicos enviados |
+| Google OIDC | Conexao da conta Google |
+| Google Drive API | Exportacao de documentos para Drive |
+| OAuth2 M2M | Exportacao tecnica sem usuario humano |
+| Swagger | Teste e documentacao dos endpoints |
 
-O projeto usa SQLite com EF Core.
+## 4. Organizacao do Codigo
 
-O banco fica em:
+```text
+Back/
+  Controllers/
+    AuthController.cs
+    DocumentsController.cs
+    GoogleController.cs
+    UsersController.cs
+    RbacController.cs
+    AuditController.cs
+    OAuthController.cs
+    M2MController.cs
+    PortalController.cs
+
+  Core/
+    Data/
+      AppDbContext.cs
+    Dtos/
+      AuthDtos.cs
+      DocumentDtos.cs
+      AuditDtos.cs
+      RbacDtos.cs
+      CommonDtos.cs
+      DtoMappings.cs
+    Models/
+      AppUser.cs
+      DocumentRecord.cs
+      AuditRecord.cs
+      RbacDefinition.cs
+    Services/
+      LdapDirectoryService.cs
+      RbacService.cs
+      DocumentRepository.cs
+      AuditService.cs
+      GoogleDriveExportService.cs
+      M2MTokenService.cs
+      M2MStorageExportService.cs
+      interfaces correspondentes
+
+Front/
+  wwwroot/
+    index.html
+    dashboard.html
+    css/site.css
+    lib/bootstrap/
+
+Storage/
+  iam-documents.db
+  Documents/
+  external/m2m-storage/
+
+docs/
+  diagrama-rbac.md
+  fluxograma-rbac.md
+  guia-do-codigo.md
+  roteiro-video.md
+  roteiro-slides-canva.md
+```
+
+## 5. Banco de Dados e Armazenamento
+
+O projeto utiliza SQLite com Entity Framework Core. O banco fica em:
 
 ```text
 Storage/iam-documents.db
 ```
 
-O SQLite guarda:
+O SQLite armazena:
 
-- metadados dos documentos
-- nome original do arquivo
-- dono do documento
-- tamanho
-- tipo MIME
-- data de upload
-- nivel de classificacao
-- logs de auditoria
+- metadados dos documentos;
+- nome original do arquivo;
+- nome fisico salvo;
+- dono do documento;
+- classificacao;
+- tamanho;
+- tipo de conteudo;
+- data de upload;
+- logs de auditoria.
 
-O SQLite nao guarda senha e nao autentica usuario.
+O SQLite nao guarda usuario nem senha. A autenticacao e realizada pelo LDAP.
 
-Os arquivos fisicos enviados ficam em:
+Os arquivos enviados ficam fisicamente em:
 
 ```text
 Storage/Documents
 ```
 
-## 5. Autenticacao centralizada por LDAP
-
-A autenticacao esta em `Back/Core/Services/LdapDirectoryService.cs`, usando a biblioteca `Novell.Directory.Ldap.NETStandard`.
-
-Fluxo de login:
-
-1. O usuario informa usuario e senha na tela `Front/wwwroot/index.html`.
-2. A tela envia `POST /api/auth/login`.
-3. `AuthController` recebe a requisicao.
-4. `AuthController` chama `IDirectoryService.AuthenticateAsync`.
-5. A implementacao real e `LdapDirectoryService`.
-6. O servico abre conexao com o LDAP configurado em `appsettings.json`.
-7. O servico faz bind administrativo para buscar o DN do usuario.
-8. O servico tenta bind com o DN do usuario e a senha digitada.
-9. Se o bind der certo, o usuario esta autenticado.
-10. O servico busca os grupos LDAP do usuario.
-11. Os grupos LDAP viram roles da aplicacao.
-12. O ASP.NET Core cria um cookie de sessao.
-13. A auditoria grava `ldap.login.success`.
-
-Se o usuario ou senha estiver incorreto, a auditoria grava `ldap.login.failed`.
-
-## 6. Mapeamento LDAP para roles
-
-| Grupo no LDAP | Role na aplicacao |
-|---|---|
-| `cn=Administradores,ou=groups,dc=projetoiam,dc=local` | `Administrador` |
-| `cn=Gestores,ou=groups,dc=projetoiam,dc=local` | `Gestor` |
-| `cn=Usuarios,ou=groups,dc=projetoiam,dc=local` | `Usuario` |
-| `cn=Auditores,ou=groups,dc=projetoiam,dc=local` | `Auditor` |
-
-Usuarios usados na demonstracao:
-
-| Usuario | Senha | Papel |
-|---|---|---|
-| `admin` | `Admin@123` | Administrador |
-| `gestor` | `Gestor@123` | Gestor |
-| `aluno` | `Aluno@123` | Usuario |
-| `auditor` | `Auditor@123` | Auditor |
-
-## 7. Modelagem RBAC
-
-A matriz RBAC esta em:
+As exportacoes M2M ficam em:
 
 ```text
-Back/Core/Services/RbacService.cs
-Back/Core/Models/RbacDefinition.cs
+Storage/external/m2m-storage
 ```
 
-Roles:
+## 6. Requisito 1 - Modelagem RBAC
 
-| Papel | Finalidade |
-|---|---|
-| Administrador | Controle total, inclusive documentos, usuarios, auditoria e exportacoes |
-| Gestor | Gerencia documentos e exportacoes |
-| Usuario | Envia e acessa apenas documentos publicos |
-| Auditor | Consulta apenas eventos de auditoria |
-| ServicoM2M | Conta tecnica usada para exportacao automatizada |
+O RBAC foi implementado em:
 
-Permissoes:
+```text
+Back/Core/Models/RbacDefinition.cs
+Back/Core/Services/RbacService.cs
+```
+
+### 6.1 Papeis
+
+| Papel | Origem | Finalidade |
+|---|---|---|
+| Administrador | Grupo LDAP `Administradores` | Controle total do sistema |
+| Gestor | Grupo LDAP `Gestores` | Operacao de documentos e exportacao Google |
+| Usuario | Grupo LDAP `Usuarios` | Acesso apenas a documentos Publico |
+| Auditor | Grupo LDAP `Auditores` | Consulta de auditoria |
+| ServicoM2M | Credencial tecnica | Exportacao entre sistemas |
+
+### 6.2 Permissoes
 
 | Permissao | Significado |
 |---|---|
-| `documents.upload` | Pode enviar documento |
-| `documents.view.public` | Pode listar documentos Publico |
-| `documents.view.all` | Pode listar documentos de todos |
+| `documents.upload` | Pode enviar documentos |
+| `documents.view.public` | Pode visualizar documentos Publico |
+| `documents.view.all` | Pode visualizar todos os documentos |
 | `documents.download.public` | Pode baixar documentos Publico |
-| `documents.download.all` | Pode baixar documentos de todos |
+| `documents.download.all` | Pode baixar todos os documentos |
 | `documents.delete` | Pode excluir documentos |
-| `exports.google_drive` | Pode exportar para Google Drive |
-| `exports.m2m` | Pode exportar via M2M |
-| `users.manage.roles` | Pode alterar papel no LDAP |
-| `audit.view` | Pode consultar auditoria |
+| `exports.google_drive` | Pode exportar documentos permitidos para Google Drive |
+| `exports.m2m` | Pode exportar documentos por fluxo M2M |
+| `users.manage.roles` | Pode alterar papeis no LDAP |
+| `audit.view` | Pode consultar logs de auditoria |
 
-Matriz resumida:
+### 6.3 Matriz RBAC
 
-| Papel | Permissoes principais |
-|---|---|
-| Administrador | Todas as permissoes |
-| Gestor | Upload, ver todos, baixar todos, exportar Google Drive |
-| Usuario | Upload apenas Publico, ver Publico, baixar Publico, exportar Publico para Google Drive |
-| Auditor | Ver auditoria |
-| ServicoM2M | Exportar M2M |
+| Acao | Administrador | Gestor | Usuario | Auditor | ServicoM2M |
+|---|---:|---:|---:|---:|---:|
+| Enviar documento Publico | Sim | Sim | Sim | Nao | Nao |
+| Enviar documento Interno | Sim | Sim | Nao | Nao | Nao |
+| Enviar documento Confidencial | Sim | Sim | Nao | Nao | Nao |
+| Ver documentos Publico | Sim | Sim | Sim | Nao | Nao |
+| Ver documentos Interno/Confidencial | Sim | Sim | Nao | Nao | Nao |
+| Baixar documentos Publico | Sim | Sim | Sim | Nao | Nao |
+| Baixar documentos Interno/Confidencial | Sim | Sim | Nao | Nao | Nao |
+| Excluir documento | Sim | Nao | Nao | Nao | Nao |
+| Exportar para Google Drive | Sim | Sim | Apenas Publico | Nao | Nao |
+| Alterar papeis LDAP | Sim | Nao | Nao | Nao | Nao |
+| Consultar auditoria | Sim | Nao | Nao | Sim | Nao |
+| Exportar via M2M | Sim | Nao | Nao | Nao | Sim |
 
-## 8. Como a autorizacao e aplicada
+### 6.4 Aplicacao do RBAC no Back-end
 
-As permissoes nao ficam apenas na tela. Elas sao verificadas no back-end.
+As permissoes sao verificadas no back-end, nao apenas escondidas no front.
 
 Exemplos:
 
-- `DocumentsController.GetAll` so lista documentos se o usuario tiver `documents.view.all` ou `documents.view.public`.
-- `DocumentsController.Download` usa `CanDownloadDocument` para impedir acesso indevido.
-- `DocumentsController.Delete` exige `documents.delete`, portanto apenas administrador.
-- `UsersController.UpdateRole` exige `users.manage.roles`, portanto apenas administrador.
-- `AuditController.GetRecent` exige `audit.view`, portanto administrador ou auditor.
-- `M2MController.Export` exige token Bearer valido com escopo `exports.m2m`.
+- `DocumentsController.GetAll` lista apenas documentos permitidos pelo papel.
+- `DocumentsController.Upload` bloqueia `Usuario` tentando enviar `Interno` ou `Confidencial`.
+- `DocumentsController.Download` impede download de documento restrito.
+- `DocumentsController.ExportGoogleDriveCore` valida se o usuario pode ver o documento antes de exportar.
+- `UsersController.UpdateRole` exige `users.manage.roles`.
+- `AuditController.GetRecent` exige `audit.view`.
 
-Se o usuario tentar acessar uma rota sem permissao, a API retorna `403 Forbidden`.
+## 7. Requisito 2 - Autenticacao Centralizada LDAP
 
-## 9. Telas por papel
+A autenticacao centralizada foi implementada em:
 
-| Papel | Tela liberada |
-|---|---|
-| Administrador | Documentos, envio, Drive, usuarios LDAP e auditoria |
-| Gestor | Documentos, envio e Drive |
-| Usuario | Envio apenas Publico, Drive e apenas documentos Publico |
-| Auditor | Apenas auditoria |
+```text
+Back/Core/Services/LdapDirectoryService.cs
+Back/Controllers/AuthController.cs
+```
 
-Isso e feito no `PortalController`, que verifica as permissoes antes de montar cada bloco visual.
+Biblioteca usada:
 
-## 10. Governanca de acesso
+```text
+Novell.Directory.Ldap.NETStandard
+```
 
-A troca de papel e feita no LDAP, nao no banco local.
+Configuracao LDAP em `appsettings.json`:
 
-Fluxo:
+```json
+"Ldap": {
+  "Host": "3.17.68.102",
+  "Port": 389,
+  "UseSsl": false,
+  "BaseDn": "dc=projetoiam,dc=local",
+  "UsersOu": "ou=users",
+  "GroupsOu": "ou=groups",
+  "AdminDn": "cn=admin,dc=projetoiam,dc=local",
+  "AdminPassword": "admin123",
+  "UserSearchFilter": "(uid={0})"
+}
+```
 
-1. O administrador acessa o painel.
-2. O painel consulta os usuarios LDAP.
-3. O administrador seleciona usuario e novo papel.
-4. A tela envia `POST /api/users/role`.
-5. `UsersController` valida `users.manage.roles`.
-6. `LdapDirectoryService.UpdateRoleAsync` remove o usuario dos grupos antigos.
-7. O mesmo metodo adiciona o usuario ao grupo LDAP do novo papel.
-8. A auditoria grava `directory.role.changed`.
-9. O usuario precisa fazer novo login para receber a nova role no cookie.
+### 7.1 Usuarios LDAP usados
 
-## 11. OpenID Connect e Google Drive
+| Usuario | Senha | Grupo LDAP | Papel no sistema |
+|---|---|---|---|
+| `admin` | `Admin@123` | `Administradores` | Administrador |
+| `gestor` | `Gestor@123` | `Gestores` | Gestor |
+| `aluno` | `Aluno@123` | `Usuarios` | Usuario |
+| `auditor` | `Auditor@123` | `Auditores` | Auditor |
 
-O Google nao e usado para login principal da aplicacao. O login principal e LDAP.
+### 7.2 Fluxo de Login
 
-O Google e usado para conectar uma conta externa e permitir exportacao para Google Drive.
+1. Usuario informa login e senha na tela `index.html`.
+2. A tela envia `POST /api/auth/login`.
+3. `AuthController` chama `IDirectoryService.AuthenticateAsync`.
+4. A implementacao usada e `LdapDirectoryService`.
+5. O servico faz bind administrativo no LDAP.
+6. O servico busca o usuario pelo filtro `(uid={0})`.
+7. O sistema tenta bind com o DN do usuario e a senha digitada.
+8. Se o bind for valido, o usuario esta autenticado.
+9. O servico consulta os grupos LDAP do usuario.
+10. Os grupos viram roles RBAC.
+11. O ASP.NET Core cria o cookie de sessao.
+12. A auditoria registra `ldap.login.success`.
 
-Fluxo:
+Em caso de falha, a auditoria registra `ldap.login.failed`.
 
-1. Usuario autenticado por LDAP clica em `Conectar Google`.
-2. `GoogleController.Connect` inicia o desafio OIDC.
-3. O Google autentica a conta e retorna para `/signin-google`.
-4. A aplicacao salva os tokens em um cookie separado chamado `DocumentPortalIam.Google`.
-5. O usuario clica em `Drive` em um documento permitido.
-6. `GoogleDriveExportService` pega o access token salvo.
-7. A Google Drive API recebe o arquivo.
-8. A auditoria grava `google.drive.export.success`.
+## 8. Requisito 3 - Integracao OIDC e Google Drive
 
-Escopos configurados:
+A integracao com Google foi implementada em:
+
+```text
+Program.cs
+Back/Controllers/GoogleController.cs
+Back/Core/Services/GoogleDriveExportService.cs
+```
+
+Bibliotecas usadas:
+
+```text
+Microsoft.AspNetCore.Authentication.OpenIdConnect
+Google.Apis.Drive.v3
+```
+
+### 8.1 Papel do OIDC
+
+O Google nao substitui o login principal. O login principal continua sendo LDAP.
+
+O OpenID Connect e usado depois do login LDAP para conectar uma conta Google externa. Essa conta fornece token para exportacao de documentos para o Google Drive.
+
+### 8.2 Escopos configurados
 
 ```text
 openid
@@ -211,109 +289,243 @@ email
 https://www.googleapis.com/auth/drive.file
 ```
 
-## 12. OAuth2 M2M
+### 8.3 Fluxo OIDC + Drive
 
-O fluxo M2M simula uma integracao tecnica, sem usuario humano.
+1. Usuario faz login no sistema via LDAP.
+2. Usuario clica em `Conectar Google`.
+3. `GoogleController.Connect` inicia o fluxo OIDC.
+4. Google autentica a conta externa.
+5. Google retorna para `/signin-google`.
+6. A aplicacao salva os tokens em um cookie separado chamado `DocumentPortalIam.Google`.
+7. Usuario clica em `Drive` em um documento permitido.
+8. `GoogleDriveExportService` recupera o access token.
+9. A Google Drive API envia o arquivo para o Drive da conta conectada.
+10. A auditoria registra `google.drive.export.success`.
 
-Fluxo:
+### 8.4 Controle RBAC na exportacao Google
+
+O endpoint de exportacao valida:
+
+- se o usuario tem `exports.google_drive`;
+- se o usuario pode visualizar o documento solicitado.
+
+Com isso:
+
+- Administrador exporta qualquer documento;
+- Gestor exporta qualquer documento;
+- Usuario exporta apenas documentos Publico;
+- Auditor nao exporta documentos.
+
+## 9. Requisito 4 - OAuth2 Machine-to-Machine
+
+O fluxo M2M foi implementado em:
+
+```text
+Back/Controllers/OAuthController.cs
+Back/Controllers/M2MController.cs
+Back/Core/Services/M2MTokenService.cs
+Back/Core/Services/M2MStorageExportService.cs
+```
+
+### 9.1 O que e M2M neste projeto
+
+M2M significa Machine-to-Machine. No projeto, ele representa um sistema externo acessando a API sem usuario humano logado.
+
+Em vez de usar login LDAP, o cliente tecnico usa:
+
+```text
+client_id = storage-client
+client_secret = M2M@123
+```
+
+Se as credenciais estiverem corretas, a API gera um Bearer token com escopo:
+
+```text
+exports.m2m
+```
+
+### 9.2 Fluxo M2M
 
 1. Cliente tecnico chama `POST /api/oauth/token`.
 2. Envia `client_id` e `client_secret`.
 3. `OAuthController` chama `M2MTokenService`.
-4. Se as credenciais estiverem corretas, a API emite um Bearer token.
-5. O cliente chama `POST /api/m2m/export/{id}`.
-6. `M2MController` valida o token e o escopo.
-7. `M2MStorageExportService` copia o arquivo para `Storage/external/m2m-storage`.
-8. A auditoria registra a exportacao.
+4. `M2MTokenService` valida as credenciais.
+5. A API retorna `access_token`, `token_type`, `expires_in` e `scope`.
+6. Cliente chama `POST /api/m2m/export/{id}`.
+7. Cliente envia `Authorization: Bearer {token}`.
+8. `M2MController` valida o token e o escopo `exports.m2m`.
+9. `M2MStorageExportService` copia o documento para `Storage/external/m2m-storage`.
+10. A auditoria registra `m2m.export.success`.
 
-Credenciais usadas:
+### 9.3 Como demonstrar
 
-| Campo | Valor |
-|---|---|
-| `client_id` | `storage-client` |
-| `client_secret` | `M2M@123` |
-| `scope` | `exports.m2m` |
+No Swagger:
 
-## 13. Auditoria
+1. Executar `POST /api/oauth/token`.
+2. Copiar o `access_token`.
+3. Clicar em `Authorize`.
+4. Colar apenas o token.
+5. Executar `POST /api/m2m/export/{id}`.
+6. Mostrar o arquivo em `Storage/external/m2m-storage`.
 
-A auditoria fica em `AuditService`.
+## 10. Auditoria
 
-Eventos gravados:
-
-- login LDAP com sucesso
-- falha de login LDAP
-- logout
-- upload de documento
-- download de documento
-- exclusao de documento
-- troca de papel no LDAP
-- emissao de token M2M
-- exportacao para Google Drive
-- exportacao M2M
-
-O endpoint de consulta e:
+A auditoria foi implementada em:
 
 ```text
-GET /api/audit
+Back/Core/Services/AuditService.cs
+Back/Controllers/AuditController.cs
 ```
 
-Somente `Administrador` e `Auditor` possuem `audit.view`.
+Os logs ficam na tabela `AuditLogs` do SQLite.
 
-## 14. Swagger
+Eventos registrados:
 
-O Swagger fica em:
+- `ldap.login.success`
+- `ldap.login.failed`
+- `session.logout`
+- `document.upload`
+- `document.download`
+- `document.delete`
+- `directory.role.changed`
+- `google.drive.export.success`
+- `oauth2.token.issued`
+- `oauth2.token.denied`
+- `m2m.export.success`
+- `m2m.export.denied`
+
+Somente `Administrador` e `Auditor` possuem permissao `audit.view`.
+
+## 11. Governanca de Acesso
+
+A governanca foi implementada na troca de papeis LDAP:
+
+```text
+Back/Controllers/UsersController.cs
+Back/Core/Services/LdapDirectoryService.cs
+```
+
+Fluxo:
+
+1. Administrador acessa o painel.
+2. O painel lista usuarios consultando o LDAP.
+3. Administrador escolhe usuario e novo papel.
+4. A API valida a permissao `users.manage.roles`.
+5. O sistema remove o usuario dos grupos antigos.
+6. O sistema adiciona o usuario ao grupo LDAP do novo papel.
+7. A auditoria registra `directory.role.changed`.
+8. O usuario precisa fazer novo login para receber o novo papel no cookie.
+
+Gestor, Usuario e Auditor nao alteram papeis.
+
+## 12. Front-end
+
+O front fica em:
+
+```text
+Front/wwwroot
+```
+
+Tecnologias:
+
+- HTML;
+- CSS;
+- Bootstrap;
+- sem Razor;
+- sem JavaScript obrigatorio.
+
+O login e uma pagina estatica. O painel `/dashboard` e renderizado pelo `PortalController` como HTML puro, permitindo exibir dados reais do SQLite e LDAP sem usar Razor.
+
+O front tambem respeita o RBAC:
+
+- Auditor nao ve upload nem documentos;
+- Gestor nao ve auditoria nem usuarios;
+- Usuario ve apenas upload Publico e documentos Publico;
+- Administrador ve todos os blocos.
+
+## 13. Swagger
+
+O Swagger esta disponivel em:
 
 ```text
 http://localhost:5169/swagger
 ```
 
-Os controllers usam `SwaggerOperation` para explicar quem pode acessar cada rota e o que ela faz.
+Melhorias implementadas:
 
-## 15. Bibliotecas utilizadas
+- grupos por area funcional;
+- descricao geral com passo de teste;
+- request body para login LDAP;
+- request body para token M2M;
+- botao `Authorize` para Bearer token M2M;
+- respostas documentadas para `400`, `401`, `403` e `404`.
 
-| Biblioteca | Uso |
+## 14. Bibliotecas Utilizadas
+
+| Biblioteca | Finalidade |
 |---|---|
-| `Microsoft.AspNetCore.Authentication.Cookies` | Criar sessao local por cookie |
-| `Microsoft.AspNetCore.Authentication.OpenIdConnect` | Conectar conta Google via OIDC |
+| `Microsoft.AspNetCore.Authentication.Cookies` | Sessao do usuario por cookie |
+| `Microsoft.AspNetCore.Authentication.OpenIdConnect` | Conexao Google OIDC |
 | `Novell.Directory.Ldap.NETStandard` | Autenticacao e consulta LDAP |
 | `Microsoft.EntityFrameworkCore.Sqlite` | Banco SQLite |
-| `Google.Apis.Drive.v3` | Envio de arquivo para Google Drive |
-| `Swashbuckle.AspNetCore` | Swagger |
-| `System.Security.Cryptography` | Geracao de tokens M2M |
+| `Google.Apis.Drive.v3` | Exportacao para Google Drive |
+| `Swashbuckle.AspNetCore` | Swagger UI |
+| `Swashbuckle.AspNetCore.Annotations` | Descricao dos endpoints |
+| `System.Security.Cryptography` | Geracao de token M2M |
 
-## 16. Como demonstrar
+## 15. Como Executar
 
-1. Rodar `dotnet run --urls http://localhost:5169`.
-2. Entrar como `admin`.
-3. Mostrar `/api/auth/me` no Swagger para provar role e permissoes.
-4. Enviar documento.
-5. Mostrar que o documento aparece no SQLite e o arquivo fisico em `Storage/Documents`.
-6. Entrar como `aluno` e mostrar que ele so ve documentos Publico.
-7. Entrar como `auditor` e mostrar que ele nao ve documentos, apenas auditoria.
-8. Entrar como `gestor` e mostrar que ele ve documentos, mas nao ve logs.
-9. Conectar Google por OIDC.
-10. Exportar documento para Google Drive.
-11. Executar `docs/demo-m2m.ps1`.
-12. Abrir a auditoria e mostrar os eventos.
+```powershell
+dotnet restore
+dotnet run --urls http://localhost:5169
+```
 
-## 17. Resposta curta para perguntas provaveis
+URLs principais:
 
-**O login usa banco de dados?**
+```text
+http://localhost:5169
+http://localhost:5169/dashboard
+http://localhost:5169/swagger
+```
 
-Nao. O login usa LDAP. O SQLite guarda documentos e logs.
+## 16. Roteiro Resumido de Demonstracao
 
-**Por que tem cookie?**
+1. Rodar a aplicacao.
+2. Logar como `admin / Admin@123`.
+3. Abrir `/api/auth/me` no Swagger.
+4. Enviar documento `Confidencial`.
+5. Logar como `aluno / Aluno@123` e mostrar que o Confidencial nao aparece.
+6. Mostrar que aluno so envia `Publico`.
+7. Logar como `gestor / Gestor@123` e mostrar acesso a documentos, mas sem auditoria.
+8. Logar como `auditor / Auditor@123` e mostrar apenas auditoria.
+9. Voltar como admin e mostrar a troca de papel LDAP.
+10. Conectar Google por OIDC.
+11. Exportar documento para Google Drive.
+12. Gerar token M2M no Swagger.
+13. Exportar documento via M2M.
+14. Mostrar arquivo em `Storage/external/m2m-storage`.
+15. Abrir auditoria e mostrar os eventos.
 
-Depois que o LDAP valida usuario e senha, a aplicacao cria um cookie para manter a sessao local.
+## 17. Evidencias no Codigo
 
-**Por que precisa fazer novo login depois de trocar papel?**
+| Requisito | Evidencia |
+|---|---|
+| LDAP | `LdapDirectoryService.AuthenticateAsync` faz bind LDAP |
+| RBAC | `RbacService` mapeia roles para permissoes |
+| Cookie Authentication | `Program.cs` configura `DocumentPortalIam.Auth` |
+| OIDC | `Program.cs` configura `AddOpenIdConnect("Google")` |
+| Drive | `GoogleDriveExportService` usa `DriveService` |
+| OAuth2 M2M | `OAuthController` emite token e `M2MController` valida Bearer |
+| SQLite | `AppDbContext` define `Documents` e `AuditLogs` |
+| Auditoria | `AuditService.WriteAsync` grava eventos |
+| Governanca | `UsersController` e `LdapDirectoryService.UpdateRoleAsync` alteram grupos LDAP |
 
-Porque as roles ficam nas claims do cookie. Ao logar de novo, o sistema consulta o LDAP e cria um cookie novo.
+## 18. Consideracoes Finais
 
-**O Google e usado para autenticar no sistema?**
+O Portal IAM Docs atende aos requisitos principais da atividade. A aplicacao usa LDAP real para autenticacao centralizada, RBAC para autorizacao, SQLite para documentos e auditoria, OpenID Connect para conexao Google, Google Drive API para exportacao externa e OAuth2 M2M para integracao tecnica entre sistemas.
 
-Nao. O Google e usado para conectar uma conta externa e exportar para Drive. A autenticacao principal continua sendo LDAP.
+O projeto tambem demonstra governanca, pois o administrador consegue alterar papeis no LDAP, e as acoes sensiveis ficam registradas em auditoria.
 
-**O auditor pode ver documentos?**
+## 19. Observacao sobre Kerberos
 
-Nao. O auditor so possui `audit.view`.
+O bonus de Kerberos nao foi implementado. O projeto concentra a entrega obrigatoria em LDAP, RBAC, OIDC, OAuth2 M2M, auditoria e documentacao.

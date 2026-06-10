@@ -42,6 +42,23 @@ builder.Services.AddSwaggerGen(options =>
         - Auditor: apenas auditoria.
         """
     });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "M2M token",
+        Description = """
+        Token para o fluxo OAuth2 M2M.
+
+        Como usar:
+        1. Execute POST /api/oauth/token.
+        2. Copie o access_token retornado.
+        3. Clique em Authorize.
+        4. Cole apenas o token, sem escrever Bearer.
+
+        O Swagger enviara o header Authorization: Bearer {token}.
+        """
+    });
     options.EnableAnnotations();
     options.OperationFilter<SwaggerUsageOperationFilter>();
     options.TagActionsBy(apiDescription =>

@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\DocumentPortalIam.props" />
-</Project>
