@@ -32,11 +32,10 @@ public sealed class DocumentsController : ControllerBase
     [HttpGet]
     [SwaggerOperation(
         Summary = "Lista documentos permitidos pelo RBAC.",
-        Description = "Usuario logado. Administrador e Gestor visualizam todos; Usuario comum visualiza apenas documentos proprios; Auditor nao acessa documentos.")]
+        Description = "Usuario logado. Administrador e Gestor visualizam todos; Usuario comum visualiza apenas documentos Publico; Auditor nao acessa documentos.")]
     public async Task<ActionResult<IReadOnlyList<DocumentDto>>> GetAll()
     {
-        if (!_rbac.HasPermission(User, Permissions.ViewAllDocuments)
-            && !_rbac.HasPermission(User, Permissions.ViewOwnDocuments))
+        if (!_rbac.CanAccessDocuments(User))
         {
             return Forbid();
         }
@@ -56,7 +55,7 @@ public sealed class DocumentsController : ControllerBase
     [Consumes("multipart/form-data")]
     [SwaggerOperation(
         Summary = "Envia documento.",
-        Description = "Administrador, Gestor e Usuario podem enviar arquivo. O arquivo fica em Storage/Documents e os metadados ficam no SQLite.")]
+        Description = "Administrador e Gestor podem enviar Publico, Interno ou Confidencial. Usuario comum pode enviar apenas Publico. Auditor nao envia documentos.")]
     public async Task<ActionResult<DocumentDto>> Upload([FromForm] UploadDocumentRequestDto request)
     {
         if (!_rbac.HasPermission(User, Permissions.UploadDocument))
@@ -69,11 +68,22 @@ public sealed class DocumentsController : ControllerBase
             return BadRequest(new MessageResponseDto { Message = "Arquivo nao enviado." });
         }
 
+        var normalizedSensitivity = DocumentSensitivities.Normalize(request.Sensitivity);
+        if (string.IsNullOrWhiteSpace(normalizedSensitivity))
+        {
+            return BadRequest(new MessageResponseDto { Message = "Classificacao invalida." });
+        }
+
+        if (!_rbac.CanUploadSensitivity(User, normalizedSensitivity))
+        {
+            return Forbid();
+        }
+
         var actor = User.Identity?.Name ?? "unknown";
         DocumentRecord document;
         try
         {
-            document = await _documents.SaveAsync(request.File, actor, request.Sensitivity);
+            document = await _documents.SaveAsync(request.File, actor, normalizedSensitivity);
         }
         catch (InvalidOperationException exception)
         {
@@ -102,7 +112,7 @@ public sealed class DocumentsController : ControllerBase
     [HttpGet("{id:int}/download")]
     [SwaggerOperation(
         Summary = "Baixa documento.",
-        Description = "Administrador e Gestor baixam qualquer documento. Usuario comum baixa apenas os proprios. Auditor nao possui permissao de download.")]
+        Description = "Administrador e Gestor baixam qualquer documento. Usuario comum baixa apenas documentos Publico. Auditor nao possui permissao de download.")]
     public async Task<IActionResult> Download(int id)
     {
         var document = await _documents.FindAsync(id);
@@ -161,7 +171,7 @@ public sealed class DocumentsController : ControllerBase
     [HttpPost("{id:int}/export/google-drive")]
     [SwaggerOperation(
         Summary = "Exporta documento para o Google Drive.",
-        Description = "Administrador, Gestor ou Usuario com acesso ao documento. Requer conta Google conectada via OpenID Connect e usa Google Drive API.")]
+        Description = "Administrador, Gestor ou Usuario com acesso ao documento. Usuario comum exporta apenas documentos Publico. Requer conta Google conectada via OpenID Connect e usa Google Drive API.")]
     public async Task<ActionResult<ExportResultDto>> ExportGoogleDrive(int id, GoogleDriveExportRequestDto request)
     {
         return await ExportGoogleDriveCore(id, request);

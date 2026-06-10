@@ -114,7 +114,7 @@ Roles:
 |---|---|
 | Administrador | Controle total, inclusive documentos, usuarios, auditoria e exportacoes |
 | Gestor | Gerencia documentos e exportacoes |
-| Usuario | Envia e acessa apenas os proprios documentos |
+| Usuario | Envia e acessa apenas documentos publicos |
 | Auditor | Consulta apenas eventos de auditoria |
 | ServicoM2M | Conta tecnica usada para exportacao automatizada |
 
@@ -123,9 +123,9 @@ Permissoes:
 | Permissao | Significado |
 |---|---|
 | `documents.upload` | Pode enviar documento |
-| `documents.view.own` | Pode listar documentos proprios |
+| `documents.view.public` | Pode listar documentos Publico |
 | `documents.view.all` | Pode listar documentos de todos |
-| `documents.download.own` | Pode baixar documentos proprios |
+| `documents.download.public` | Pode baixar documentos Publico |
 | `documents.download.all` | Pode baixar documentos de todos |
 | `documents.delete` | Pode excluir documentos |
 | `exports.google_drive` | Pode exportar para Google Drive |
@@ -139,7 +139,7 @@ Matriz resumida:
 |---|---|
 | Administrador | Todas as permissoes |
 | Gestor | Upload, ver todos, baixar todos, exportar Google Drive |
-| Usuario | Upload, ver proprios, baixar proprios, exportar Google Drive |
+| Usuario | Upload apenas Publico, ver Publico, baixar Publico, exportar Publico para Google Drive |
 | Auditor | Ver auditoria |
 | ServicoM2M | Exportar M2M |
 
@@ -149,7 +149,7 @@ As permissoes nao ficam apenas na tela. Elas sao verificadas no back-end.
 
 Exemplos:
 
-- `DocumentsController.GetAll` so lista documentos se o usuario tiver `documents.view.all` ou `documents.view.own`.
+- `DocumentsController.GetAll` so lista documentos se o usuario tiver `documents.view.all` ou `documents.view.public`.
 - `DocumentsController.Download` usa `CanDownloadDocument` para impedir acesso indevido.
 - `DocumentsController.Delete` exige `documents.delete`, portanto apenas administrador.
 - `UsersController.UpdateRole` exige `users.manage.roles`, portanto apenas administrador.
@@ -164,7 +164,7 @@ Se o usuario tentar acessar uma rota sem permissao, a API retorna `403 Forbidden
 |---|---|
 | Administrador | Documentos, envio, Drive, usuarios LDAP e auditoria |
 | Gestor | Documentos, envio e Drive |
-| Usuario | Envio, Drive e apenas os proprios documentos |
+| Usuario | Envio apenas Publico, Drive e apenas documentos Publico |
 | Auditor | Apenas auditoria |
 
 Isso e feito no `PortalController`, que verifica as permissoes antes de montar cada bloco visual.
@@ -288,7 +288,7 @@ Os controllers usam `SwaggerOperation` para explicar quem pode acessar cada rota
 3. Mostrar `/api/auth/me` no Swagger para provar role e permissoes.
 4. Enviar documento.
 5. Mostrar que o documento aparece no SQLite e o arquivo fisico em `Storage/Documents`.
-6. Entrar como `aluno` e mostrar que ele so ve os proprios documentos.
+6. Entrar como `aluno` e mostrar que ele so ve documentos Publico.
 7. Entrar como `auditor` e mostrar que ele nao ve documentos, apenas auditoria.
 8. Entrar como `gestor` e mostrar que ele ve documentos, mas nao ve logs.
 9. Conectar Google por OIDC.

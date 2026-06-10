@@ -11,7 +11,7 @@ Duracao sugerida: 3 a 5 minutos.
 5. Enviar um documento e explicar que:
    - metadados ficam em `Storage/iam-documents.db`;
    - arquivo fisico fica em `Storage/Documents`.
-6. Entrar como `aluno / Aluno@123` e mostrar que ele so ve documentos proprios.
+6. Entrar como `aluno / Aluno@123` e mostrar que ele so ve documentos Publico e so consegue enviar Publico.
 7. Entrar como `gestor / Gestor@123` e mostrar que ele ve documentos, mas nao ve auditoria nem usuarios.
 8. Entrar como `auditor / Auditor@123` e mostrar que ele ve apenas auditoria.
 9. Voltar como `admin` e alterar o papel de um usuario no painel LDAP.

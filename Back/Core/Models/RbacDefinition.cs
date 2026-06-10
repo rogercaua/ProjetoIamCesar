@@ -12,15 +12,35 @@ public static class AppRoles
 public static class Permissions
 {
     public const string UploadDocument = "documents.upload";
-    public const string ViewOwnDocuments = "documents.view.own";
+    public const string ViewPublicDocuments = "documents.view.public";
     public const string ViewAllDocuments = "documents.view.all";
-    public const string DownloadOwnDocuments = "documents.download.own";
+    public const string DownloadPublicDocuments = "documents.download.public";
     public const string DownloadAllDocuments = "documents.download.all";
     public const string DeleteDocuments = "documents.delete";
     public const string ExportGoogleDrive = "exports.google_drive";
     public const string ExportM2M = "exports.m2m";
     public const string ManageRoles = "users.manage.roles";
     public const string ViewAudit = "audit.view";
+}
+
+public static class DocumentSensitivities
+{
+    public const string Public = "Publico";
+    public const string Internal = "Interno";
+    public const string Confidential = "Confidencial";
+
+    public static readonly IReadOnlyList<string> All = new[]
+    {
+        Public,
+        Internal,
+        Confidential
+    };
+
+    public static string Normalize(string? value)
+    {
+        return All.FirstOrDefault(sensitivity =>
+            string.Equals(sensitivity, value?.Trim(), StringComparison.OrdinalIgnoreCase)) ?? "";
+    }
 }
 
 public sealed class RoleDefinition

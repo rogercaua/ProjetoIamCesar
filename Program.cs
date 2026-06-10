@@ -1,10 +1,13 @@
 using DocumentPortalIam.Back.Core.Data;
 using DocumentPortalIam.Back.Core.Services;
+using DocumentPortalIam.Back.Core.Swagger;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -19,7 +22,49 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Portal IAM Docs API",
+        Version = "v1",
+        Description = """
+        API do projeto pratico de IAM.
+
+        Como testar:
+        1. Execute POST /api/auth/login com admin/Admin@123, gestor/Gestor@123, aluno/Aluno@123 ou auditor/Auditor@123.
+        2. Depois do login, o Swagger usa o cookie da sessao para testar rotas protegidas.
+        3. Para Google Drive, conecte a conta pelo painel em /dashboard.
+        4. Para M2M, execute POST /api/oauth/token, copie o access_token e use no header Authorization da rota /api/m2m/export/{id}.
+
+        Regras principais:
+        - Administrador: controle total.
+        - Gestor: documentos e Google Drive, sem auditoria e sem troca de papeis.
+        - Usuario/aluno: apenas documentos Publico.
+        - Auditor: apenas auditoria.
+        """
+    });
     options.EnableAnnotations();
+    options.OperationFilter<SwaggerUsageOperationFilter>();
+    options.TagActionsBy(apiDescription =>
+    {
+        var controller = apiDescription.ActionDescriptor.RouteValues["controller"];
+        return new[]
+        {
+            controller switch
+            {
+                "Auth" => "01 - Login LDAP e sessao",
+                "Documents" => "02 - Documentos",
+                "Google" => "03 - Google OIDC e Drive",
+                "Users" => "04 - Governanca LDAP",
+                "Rbac" => "05 - Matriz RBAC",
+                "Audit" => "06 - Auditoria",
+                "OAuth" => "07 - OAuth2 M2M Token",
+                "M2M" => "08 - Exportacao M2M",
+                _ => controller ?? "Outros"
+            }
+        };
+    });
+    options.OrderActionsBy(apiDescription =>
+        $"{apiDescription.ActionDescriptor.RouteValues["controller"]}_{apiDescription.HttpMethod}_{apiDescription.RelativePath}");
 });
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(
@@ -112,6 +157,13 @@ app.UseSwaggerUI(options =>
 {
     options.DocumentTitle = "Portal IAM Docs API";
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Portal IAM Docs API v1");
+    options.DisplayRequestDuration();
+    options.DocExpansion(DocExpansion.List);
+    options.EnableDeepLinking();
+    options.EnableFilter();
+    options.DefaultModelsExpandDepth(1);
+    options.DefaultModelExpandDepth(2);
+    options.ConfigObject.AdditionalItems["withCredentials"] = true;
 });
 
 if (!app.Environment.IsDevelopment())

@@ -141,8 +141,8 @@ Frase para apresentar:
 
 Exemplo pratico:
 
-- `aluno` tem `documents.view.own`;
-- por isso ele so ve documentos onde `OwnerUserName == aluno`;
+- `aluno` tem `documents.view.public`;
+- por isso ele so ve documentos classificados como `Publico`;
 - `gestor` tem `documents.view.all`;
 - por isso ve documentos de todos;
 - `auditor` nao tem permissao de documento;
@@ -230,7 +230,7 @@ Documentos e auditoria. Nao guarda senha.
 
 ### Por que o auditor nao ve arquivos?
 
-Porque ele so tem `audit.view`. Ele nao tem `documents.view.own` nem `documents.view.all`.
+Porque ele so tem `audit.view`. Ele nao tem `documents.view.public` nem `documents.view.all`.
 
 ### Por que o gestor nao ve logs?
 

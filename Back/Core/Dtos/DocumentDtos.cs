@@ -17,7 +17,7 @@ public sealed class DocumentDto
 public sealed class UploadDocumentRequestDto
 {
     public IFormFile? File { get; set; }
-    public string Sensitivity { get; set; } = "Interno";
+    public string Sensitivity { get; set; } = "Publico";
 }
 
 public sealed class GoogleDriveExportRequestDto

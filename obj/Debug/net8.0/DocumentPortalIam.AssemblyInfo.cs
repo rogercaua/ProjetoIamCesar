@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DocumentPortalIam")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f88fccd7ae7364ee028ba815c16b5124b4e9d6a9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4e24132c803c1445446b090d3925b983522f52c6")]
 [assembly: System.Reflection.AssemblyProductAttribute("DocumentPortalIam")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DocumentPortalIam")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

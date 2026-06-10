@@ -27,7 +27,7 @@ flowchart LR
 
     Role -->|Administrador| Admin["Documentos + usuarios LDAP + auditoria + exportacoes"]
     Role -->|Gestor| Gestor["Documentos + upload + Google Drive"]
-    Role -->|Usuario| Usuario["Upload + proprios documentos + Google Drive"]
+    Role -->|Usuario| Usuario["Upload Publico + documentos Publico + Google Drive"]
     Role -->|Auditor| Auditor["Somente auditoria"]
     Role -->|ServicoM2M| M2M["Somente exportacao por token OAuth2"]
 
@@ -46,9 +46,9 @@ flowchart LR
 | Permissao | Administrador | Gestor | Usuario | Auditor | ServicoM2M |
 |---|---:|---:|---:|---:|---:|
 | `documents.upload` | Sim | Sim | Sim | Nao | Nao |
-| `documents.view.own` | Sim | Nao | Sim | Nao | Nao |
+| `documents.view.public` | Nao | Nao | Sim | Nao | Nao |
 | `documents.view.all` | Sim | Sim | Nao | Nao | Nao |
-| `documents.download.own` | Sim | Nao | Sim | Nao | Nao |
+| `documents.download.public` | Nao | Nao | Sim | Nao | Nao |
 | `documents.download.all` | Sim | Sim | Nao | Nao | Nao |
 | `documents.delete` | Sim | Nao | Nao | Nao | Nao |
 | `exports.google_drive` | Sim | Sim | Sim | Nao | Nao |

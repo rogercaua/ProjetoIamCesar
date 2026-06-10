@@ -18,9 +18,7 @@ public sealed class RbacService : IRbacService
                 Permissions = new[]
                 {
                     Permissions.UploadDocument,
-                    Permissions.ViewOwnDocuments,
                     Permissions.ViewAllDocuments,
-                    Permissions.DownloadOwnDocuments,
                     Permissions.DownloadAllDocuments,
                     Permissions.DeleteDocuments,
                     Permissions.ExportGoogleDrive,
@@ -44,12 +42,12 @@ public sealed class RbacService : IRbacService
             [AppRoles.User] = new RoleDefinition
             {
                 Name = AppRoles.User,
-                Description = "Envia, visualiza e baixa apenas seus proprios documentos.",
+                Description = "Envia, visualiza e baixa apenas documentos publicos.",
                 Permissions = new[]
                 {
                     Permissions.UploadDocument,
-                    Permissions.ViewOwnDocuments,
-                    Permissions.DownloadOwnDocuments,
+                    Permissions.ViewPublicDocuments,
+                    Permissions.DownloadPublicDocuments,
                     Permissions.ExportGoogleDrive
                 }
             },
@@ -87,12 +85,41 @@ public sealed class RbacService : IRbacService
             .ToList();
     }
 
+    public IReadOnlyList<string> GetAllowedUploadSensitivities(ClaimsPrincipal principal)
+    {
+        if (!HasPermission(principal, Permissions.UploadDocument))
+        {
+            return Array.Empty<string>();
+        }
+
+        if (principal.IsInRole(AppRoles.Admin) || principal.IsInRole(AppRoles.Manager))
+        {
+            return DocumentSensitivities.All;
+        }
+
+        return new[] { DocumentSensitivities.Public };
+    }
+
     public bool HasPermission(ClaimsPrincipal principal, string permission)
     {
         return principal.FindAll(ClaimTypes.Role)
             .Select(claim => claim.Value)
             .Any(role => _roles.TryGetValue(role, out var definition)
                 && definition.Permissions.Contains(permission));
+    }
+
+    public bool CanAccessDocuments(ClaimsPrincipal principal)
+    {
+        return HasPermission(principal, Permissions.ViewAllDocuments)
+            || HasPermission(principal, Permissions.ViewPublicDocuments);
+    }
+
+    public bool CanUploadSensitivity(ClaimsPrincipal principal, string sensitivity)
+    {
+        var normalized = DocumentSensitivities.Normalize(sensitivity);
+        return !string.IsNullOrWhiteSpace(normalized)
+            && GetAllowedUploadSensitivities(principal)
+                .Contains(normalized, StringComparer.OrdinalIgnoreCase);
     }
 
     public bool CanViewDocument(ClaimsPrincipal principal, DocumentRecord document)
@@ -102,8 +129,13 @@ public sealed class RbacService : IRbacService
             return true;
         }
 
-        return HasPermission(principal, Permissions.ViewOwnDocuments)
-            && string.Equals(principal.Identity?.Name, document.OwnerUserName, StringComparison.OrdinalIgnoreCase);
+        if (HasPermission(principal, Permissions.ViewPublicDocuments)
+            && IsPublic(document))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public bool CanDownloadDocument(ClaimsPrincipal principal, DocumentRecord document)
@@ -113,7 +145,20 @@ public sealed class RbacService : IRbacService
             return true;
         }
 
-        return HasPermission(principal, Permissions.DownloadOwnDocuments)
-            && string.Equals(principal.Identity?.Name, document.OwnerUserName, StringComparison.OrdinalIgnoreCase);
+        if (HasPermission(principal, Permissions.DownloadPublicDocuments)
+            && IsPublic(document))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsPublic(DocumentRecord document)
+    {
+        return string.Equals(
+            DocumentSensitivities.Normalize(document.Sensitivity),
+            DocumentSensitivities.Public,
+            StringComparison.OrdinalIgnoreCase);
     }
 }

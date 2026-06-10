@@ -56,6 +56,7 @@ public sealed class AuthController : ControllerBase
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
 
+        await HttpContext.SignOutAsync("GoogleExternal");
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
         await _audit.WriteAsync("ldap.login.success", user.UserName, $"Login LDAP via API com papel: {string.Join(", ", user.Roles)}.");
 
@@ -93,7 +94,8 @@ public sealed class AuthController : ControllerBase
     {
         var actor = User.Identity?.Name ?? "anonymous";
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        await _audit.WriteAsync("session.logout", actor, "Sessao encerrada via API.");
+        await HttpContext.SignOutAsync("GoogleExternal");
+        await _audit.WriteAsync("session.logout", actor, "Sessao LDAP e conexao Google encerradas via API.");
 
         if (IsHtmlFormRequest())
         {

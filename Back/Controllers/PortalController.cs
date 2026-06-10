@@ -108,22 +108,11 @@ public sealed class PortalController : Controller
 
         if (_rbac.HasPermission(User, Permissions.UploadDocument))
         {
-            cards.Add("""
-            <form class="panel bg-white border rounded-3 p-4 shadow-sm" action="/api/documents" method="post" enctype="multipart/form-data">
-                <h2>Enviar documento</h2>
-                <label for="file">Arquivo</label>
-                <input id="file" name="file" class="form-control" type="file" required>
-
-                <label for="sensitivity">Classificacao</label>
-                <select id="sensitivity" name="sensitivity" class="form-select">
-                    <option>Interno</option>
-                    <option>Confidencial</option>
-                    <option>Publico</option>
-                </select>
-
-                <button class="btn-main" type="submit">Enviar</button>
-            </form>
-            """);
+            var uploadCard = RenderUploadCard();
+            if (!string.IsNullOrWhiteSpace(uploadCard))
+            {
+                cards.Add(uploadCard);
+            }
         }
 
         if (_rbac.HasPermission(User, Permissions.ExportGoogleDrive))
@@ -140,23 +129,62 @@ public sealed class PortalController : Controller
         return $"""<section class="{gridClass} section-gap">{string.Join(Environment.NewLine, cards)}</section>""";
     }
 
+    private string RenderUploadCard()
+    {
+        var allowedSensitivities = _rbac.GetAllowedUploadSensitivities(User);
+        if (allowedSensitivities.Count == 0)
+        {
+            return "";
+        }
+
+        var options = string.Join(Environment.NewLine, allowedSensitivities.Select(sensitivity =>
+            $"""<option value="{H(sensitivity)}">{H(sensitivity)}</option>"""));
+
+        return $"""
+            <form class="panel bg-white border rounded-3 p-4 shadow-sm" action="/api/documents" method="post" enctype="multipart/form-data">
+                <h2>Enviar documento</h2>
+                <label for="file">Arquivo</label>
+                <input id="file" name="file" class="form-control" type="file" required>
+
+                <label for="sensitivity">Classificacao</label>
+                <select id="sensitivity" name="sensitivity" class="form-select">
+                    {options}
+                </select>
+
+                <button class="btn-main" type="submit">Enviar</button>
+            </form>
+        """;
+    }
+
     private static string RenderGoogleCard(bool googleConnected, string googleName)
     {
         var googleText = googleConnected
             ? $"Conectado como {H(googleName)}"
             : "Nenhuma conta Google conectada.";
+        var googleActions = googleConnected
+            ? """
+            <a class="btn-secondary-clean" href="/api/google/status">Ver status</a>
+            """
+            : """
+            <a class="btn-main as-link" href="/api/google/connect?returnUrl=/dashboard">Conectar Google</a>
+            <a class="btn-secondary-clean" href="/api/google/status">Ver status</a>
+            """;
+        var disconnectForm = googleConnected
+            ? """
+            <form action="/api/google/disconnect" method="post" class="inline-form">
+                <button class="btn-secondary-clean" type="submit">Desconectar Google</button>
+            </form>
+            """
+            : "";
 
         return $"""
         <div class="panel bg-white border rounded-3 p-4 shadow-sm">
             <h2>Google Drive</h2>
             <p class="muted">{googleText}</p>
             <div class="button-row">
-                <a class="btn-main as-link" href="/api/google/connect?returnUrl=/dashboard">Conectar Google</a>
-                <a class="btn-secondary-clean" href="/api/google/status">Ver status</a>
+                {googleActions}
             </div>
-            <form action="/api/google/disconnect" method="post" class="inline-form">
-                <button class="btn-secondary-clean" type="submit">Desconectar Google</button>
-            </form>
+            {disconnectForm}
         </div>
         """;
     }
@@ -373,7 +401,6 @@ public sealed class PortalController : Controller
 
     private bool CanSeeDocuments()
     {
-        return _rbac.HasPermission(User, Permissions.ViewAllDocuments)
-            || _rbac.HasPermission(User, Permissions.ViewOwnDocuments);
+        return _rbac.CanAccessDocuments(User);
     }
 }

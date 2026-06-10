@@ -30,6 +30,12 @@ public sealed class DocumentRepository : IDocumentRepository
 
         Directory.CreateDirectory(_documentsPath);
 
+        var normalizedSensitivity = DocumentSensitivities.Normalize(sensitivity);
+        if (string.IsNullOrWhiteSpace(normalizedSensitivity))
+        {
+            throw new InvalidOperationException("Classificacao invalida.");
+        }
+
         var extension = Path.GetExtension(file.FileName);
         var storedFileName = $"{Guid.NewGuid():N}{extension}";
         var record = new DocumentRecord
@@ -39,7 +45,7 @@ public sealed class DocumentRepository : IDocumentRepository
             ContentType = string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
             SizeInBytes = file.Length,
             OwnerUserName = ownerUserName,
-            Sensitivity = string.IsNullOrWhiteSpace(sensitivity) ? "Interno" : sensitivity,
+            Sensitivity = normalizedSensitivity,
             UploadedAt = DateTimeOffset.UtcNow
         };
 
