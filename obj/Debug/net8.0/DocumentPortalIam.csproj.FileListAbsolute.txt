@@ -134,3 +134,11 @@ C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\
 C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\DocumentPortalIam.runtimeconfig.json
 C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\DocumentPortalIam.dll
 C:\Users\roger\AppData\Local\Temp\iam-docs-out-3d77f8754cad4b679a85e65711625d5f\DocumentPortalIam.pdb
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-d8f6d0473e2f4d0ca8be84a451198b72\NuGet.config
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-d8f6d0473e2f4d0ca8be84a451198b72\appsettings.Development.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-d8f6d0473e2f4d0ca8be84a451198b72\appsettings.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-d8f6d0473e2f4d0ca8be84a451198b72\global.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-d8f6d0473e2f4d0ca8be84a451198b72\DocumentPortalIam.deps.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-d8f6d0473e2f4d0ca8be84a451198b72\DocumentPortalIam.runtimeconfig.json
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-d8f6d0473e2f4d0ca8be84a451198b72\DocumentPortalIam.dll
+C:\Users\roger\AppData\Local\Temp\iam-docs-out-d8f6d0473e2f4d0ca8be84a451198b72\DocumentPortalIam.pdb

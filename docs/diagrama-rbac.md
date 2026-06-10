@@ -1,5 +1,7 @@
 # Diagrama RBAC
 
+Este diagrama mostra a relacao entre usuarios, papeis, permissoes e recursos protegidos. Ele complementa o `docs/fluxograma-rbac.md`: o fluxograma mostra a decisao no tempo de execucao; este diagrama mostra a matriz de acesso.
+
 ```mermaid
 flowchart LR
     U1["admin"] --> R1["Administrador"]
@@ -52,3 +54,22 @@ flowchart LR
 | Usuario | Proprios documentos | Upload, ver/baixar proprios, exportar para Google Drive |
 | Auditor | Auditoria | Consulta logs sem alterar dados |
 | ServicoM2M | Storage externo | Exportacao por OAuth2 client credentials |
+
+## Observacoes importantes
+
+- `Administrador` e o unico papel humano com controle total.
+- `Gestor` gerencia documentos, mas nao consulta auditoria e nao altera papeis.
+- `Usuario` comum so acessa documentos em que ele e o dono.
+- `Auditor` nao acessa documentos; ele apenas consulta logs.
+- `ServicoM2M` nao representa uma pessoa logada. Ele representa uma integracao tecnica autenticada por token OAuth2.
+
+## Onde isso esta no codigo
+
+| Parte | Arquivo |
+|---|---|
+| Nomes dos papeis | `Back/Core/Models/RbacDefinition.cs` |
+| Nomes das permissoes | `Back/Core/Models/RbacDefinition.cs` |
+| Matriz role -> permissoes | `Back/Core/Services/RbacService.cs` |
+| Validacao nos documentos | `Back/Controllers/DocumentsController.cs` |
+| Validacao na auditoria | `Back/Controllers/AuditController.cs` |
+| Validacao na troca de papel | `Back/Controllers/UsersController.cs` |

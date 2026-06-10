@@ -1,0 +1,14 @@
+flowchart TD
+    A["Usuario informa login e senha"] --> B["AuthController recebe POST /api/auth/login"]
+    B --> C["LdapDirectoryService consulta LDAP da EC2"]
+    C --> D{"Bind LDAP valido?"}
+    D -->|Nao| E["Login negado e auditoria registra ldap.login.failed"]
+    D -->|Sim| F["Sistema busca grupos LDAP do usuario"]
+    F --> G["Grupos viram roles da aplicacao"]
+    G --> H["Cookie recebe claims de usuario e roles"]
+    H --> I["Usuario acessa dashboard ou API"]
+    I --> J["RbacService transforma roles em permissoes"]
+    J --> K{"Tem permissao para a acao?"}
+    K -->|Nao| L["API retorna 403 ou tela esconde a opcao"]
+    K -->|Sim| M["Controller executa a acao"]
+    M --> N["AuditService grava evento no SQLite"]
